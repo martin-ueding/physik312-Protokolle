@@ -35,11 +35,15 @@ def main():
     pl.clf()
 
     b = {}
+    diff = {}
 
     for wavelength in [694, 620, 568, 520, 488, 458, 430]:
         b[wavelength] = np.recfromtxt("b-{0}.csv".format(wavelength), delimiter="\t", dtype=[("phi0", "f"), ("phi", "f")])
+        diff[wavelength] = b[wavelength].phi0 - b[wavelength].phi
 
-    print b
+    print diff
+
+
 
 
 def _parse_args():
