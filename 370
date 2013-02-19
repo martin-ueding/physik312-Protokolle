@@ -59,9 +59,29 @@ def main():
     b = {}
     diff = {}
 
-    for wavelength in [694, 620, 568, 520, 488, 458, 430]:
+    wavelengths = [694, 620, 568, 520, 488, 458, 430]
+
+    for wavelength in wavelengths:
         b[wavelength] = np.recfromtxt("b-{0}.csv".format(wavelength), delimiter="\t", dtype=[("phi0", "f"), ("phi", "f")])
         diff[wavelength] = b[wavelength].phi0 - b[wavelength].phi
+
+    b_data = np.zeros(len(wavelengths), dtype=[("wavelength", "f"), ("diff", "f"), ("err", "f")])
+
+    b_data["wavelength"] = np.array(wavelengths)
+    diffs = np.array([np.mean(diff[wavelength]) for wavelength in wavelengths])
+    errs = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
+    b_data["diff"] = diffs
+    b_data["err"] = errs
+
+    pl.errorbar((b_data["wavelength"]/10**3)**(-2), b_data["diff"],
+                yerr=b_data["err"], linestyle="none", color="black",
+                marker="+")
+    pl.title(u"Drehwinkel als Funktion der Wellenlänge")
+    pl.xlabel(ur"$\lambda^{-2}/\mathrm{\mu m^{-2}}$")
+    pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
+    pl.grid(True)
+    pl.savefig("b.pdf")
+    pl.clf()
 
 
 def _parse_args():
