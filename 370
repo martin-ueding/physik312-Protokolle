@@ -15,15 +15,37 @@ def main():
 
     a_data = np.recfromtxt("a.csv", delimiter="\t", dtype=[("phi", "f"), ("U", "f")])
 
+    dunkelstrom = 0.0082
+
+    a_data.U -= dunkelstrom
+
     def malus(phi, phi0, I0, baseline):
         return I0 * (np.cos((phi - phi0)*np.pi/180))**2 + baseline
 
-    popt, pconv = op.curve_fit(malus, a_data.phi, a_data.U, p0=[90, 2.5, 0.3])
+    popt, pconv = op.curve_fit(malus, a_data.phi, a_data.U, p0=[90, 2.1, 0.35])
+
+    print popt, pconv
 
     x = np.linspace(min(a_data.phi), max(a_data.phi), 100)
     y = malus(x, *popt)
-    
 
+    I_max_val = popt[1]
+    I_min_val = popt[2]
+
+    #I_max_err = np.sqrt(pconv.diagonal())[1]
+    #I_min_err = np.sqrt(pconv.diagonal())[2]
+
+    PG_val = (I_max_val - I_min_val) / (I_max_val + I_min_val)
+
+    print "I_max = {:.3f} ± {:.3f}, I_min = {:.3f} ± {:.3f}, PG = {:.3f} ± {:.3f}".format(
+        I_max_val,
+        0,#I_max_err,
+        I_min_val,
+        0,#I_min_err,
+        PG_val,
+        0,# PG_err,
+    )
+    
     pl.errorbar(a_data.phi, a_data.U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none", color="black")
     pl.plot(x, y, label="Fit", color="black")
     pl.grid(True)
@@ -40,10 +62,6 @@ def main():
     for wavelength in [694, 620, 568, 520, 488, 458, 430]:
         b[wavelength] = np.recfromtxt("b-{0}.csv".format(wavelength), delimiter="\t", dtype=[("phi0", "f"), ("phi", "f")])
         diff[wavelength] = b[wavelength].phi0 - b[wavelength].phi
-
-    print diff
-
-
 
 
 def _parse_args():
