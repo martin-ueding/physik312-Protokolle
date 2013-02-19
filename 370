@@ -4,11 +4,35 @@
 # Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
 
 import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
 
 __docformat__ = "restructuredtext en"
 
 def main():
     options = _parse_args()
+
+    a_data = np.recfromtxt("a.csv", delimiter="\t", dtype=[("phi", "f"), ("U", "f")])
+
+    def malus(phi, phi0, I0, baseline):
+        return I0 * (np.cos((phi - phi0)*np.pi/180))**2 + baseline
+
+    popt, pconv = op.curve_fit(malus, a_data.phi, a_data.U, p0=[90, 2.5, 0.3])
+
+    x = np.linspace(min(a_data.phi), max(a_data.phi), 100)
+    y = malus(x, *popt)
+    
+
+    pl.plot(a_data.phi, a_data.U, label="Messdaten")
+    pl.plot(x, y, label="Fit")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.title(u"Intensitätstransmission nach zweitem Polfilter")
+    pl.xlabel(ur"$\phi / ^\circ$")
+    pl.ylabel(ur"$U / \mathrm{V}$")
+    pl.savefig("a.pdf")
+    pl.clf()
 
 
 def _parse_args():
