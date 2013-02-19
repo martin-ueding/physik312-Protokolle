@@ -24,8 +24,8 @@ def main():
     y = malus(x, *popt)
     
 
-    pl.plot(a_data.phi, a_data.U, label="Messdaten")
-    pl.plot(x, y, label="Fit")
+    pl.errorbar(a_data.phi, a_data.U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none", color="black")
+    pl.plot(x, y, label="Fit", color="black")
     pl.grid(True)
     pl.legend(loc="best")
     pl.title(u"Intensitätstransmission nach zweitem Polfilter")
@@ -33,6 +33,13 @@ def main():
     pl.ylabel(ur"$U / \mathrm{V}$")
     pl.savefig("a.pdf")
     pl.clf()
+
+    b = {}
+
+    for wavelength in [694, 620, 568, 520, 488, 458, 430]:
+        b[wavelength] = np.recfromtxt("b-{0}.csv".format(wavelength), delimiter="\t", dtype=[("phi0", "f"), ("phi", "f")])
+
+    print b
 
 
 def _parse_args():
