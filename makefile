@@ -6,7 +6,7 @@ a.pdf: 370
 	./$<
 
 %.pdf: %.tex
-	latexmk $<
+	pdflatex $<
 
 .PHONY: clean
 clean:
