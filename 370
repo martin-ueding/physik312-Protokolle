@@ -13,6 +13,10 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
+###############################################################################
+#                                  Aufgabe a                                  #
+###############################################################################
+
     a_data = np.genfromtxt("a.csv", delimiter="\t")
 
     dunkelstrom = 0.0082
@@ -24,7 +28,7 @@ def main():
     def malus(phi, phi0, I0, baseline):
         return I0 * (np.cos((phi - phi0)*np.pi/180))**2 + baseline
 
-    popt, pconv = op.curve_fit(malus, phi, U, p0=[90, 2.1, 0.35])
+    popt, pconv = op.curve_fit(malus, phi, U)
 
     print "φ₀ = {:.3f} ± {:.3f}, U₀ = {:.3f} ± {:.3f}, U₁ = {:.3f} ± {:.3f}".format(
         popt[0],
@@ -73,7 +77,9 @@ def main():
     pl.savefig("a.pdf")
     pl.clf()
 
-    ####
+###############################################################################
+#                                  Aufgabe b                                  #
+###############################################################################
 
     b = {}
     diff = {}
@@ -112,6 +118,10 @@ def main():
     pl.grid(True)
     pl.savefig("b.pdf")
     pl.clf()
+
+###############################################################################
+#                                  Aufgabe c                                  #
+###############################################################################
 
 
 def _parse_args():
