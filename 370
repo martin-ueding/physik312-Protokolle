@@ -89,11 +89,13 @@ def main():
         b[wavelength] = np.genfromtxt("b-{0}.csv".format(int(wavelength)), delimiter="\t")
         phi0 = b[wavelength][:,0]
         phi = b[wavelength][:,1]
-        diff[wavelength] = phi0 - phi
+        diff[wavelength] = phi0 - phi + 90
 
     plot_x = (np.array(wavelengths)/10**3)**(-2)
     plot_y = np.array([np.mean(diff[wavelength]) for wavelength in wavelengths])
     plot_y_err = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
+
+    print np.column_stack([plot_x, plot_y, plot_y_err])
 
     def linear(invers, A, B):
         return A + invers*B
@@ -145,11 +147,21 @@ def main():
 
     diffs = np.array(diffs)
 
+    print diffs
+
     x = diffs[:,0]
     y = diffs[:,1]
     y_err = diffs[:,2]
 
     popt, pconv = op.curve_fit(linear, x, y, sigma=y_err)
+
+    A_val = popt[0]
+    A_err = np.sqrt(pconv.diagonal()[0])
+    B_val = popt[1]
+    B_err = np.sqrt(pconv.diagonal()[1])
+
+    print "A = {:.3f} ± {:.3f}".format(A_val, A_err)
+    print "B = {:.3f} ± {:.3f}".format(B_val, B_err)
 
     c = popt[1]
     c_err = np.sqrt(pconv.diagonal()[1])
