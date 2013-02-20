@@ -97,14 +97,20 @@ def main():
     plot_y_err = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
 
     def rotation(invers, A, B):
-        return B + invers*A
+        return A + invers*B
 
     popt, pconv = op.curve_fit(rotation, plot_x, plot_y, sigma=plot_y_err)
 
     col = np.column_stack([plot_x, plot_y, plot_y_err])
     np.savetxt("test.txt", col)
 
-    print popt, pconv
+    A_val = popt[0]
+    A_err = np.sqrt(pconv.diagonal()[0])
+    B_val = popt[1]
+    B_err = np.sqrt(pconv.diagonal()[1])
+
+    print "A = {:.3f} ± {:.3f}".format(A_val, A_err)
+    print "B = {:.3f} ± {:.3f}".format(B_val, B_err)
 
     x = np.linspace(min(plot_x), max(plot_x), 100)
     y = rotation(x, *popt)
@@ -115,6 +121,7 @@ def main():
     pl.title(u"Drehwinkel als Funktion der Wellenlänge")
     pl.xlabel(ur"$\lambda^{-2}/\mathrm{\mu m^{-2}}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
+    pl.legend(loc="best")
     pl.grid(True)
     pl.savefig("b.pdf")
     pl.clf()
@@ -122,6 +129,37 @@ def main():
 ###############################################################################
 #                                  Aufgabe c                                  #
 ###############################################################################
+
+    nullpunkt = -86.0
+
+    konzentrationen = [1, 2, 3, 4, 5]
+    diffs = []
+
+    for konz in konzentrationen:
+        data = np.genfromtxt("c-{}.csv".format(konz), delimiter="\t")
+
+        winkel = (data[:,0] - data[:,1]) - nullpunkt
+
+        diff = np.degrees(np.arccos(np.abs(np.cos(np.radians(winkel)))))
+
+        print winkel
+        print diff
+
+        diffs.append((float(konz), np.mean(diff), np.std(diff)))
+
+    diffs = np.array(diffs)
+
+    x = diffs[:,0]
+    y = diffs[:,1]
+    y_err = diffs[:,2]
+
+    pl.errorbar(x, y, y_err, linestyle="none", marker="+", label="Messdaten")
+    pl.xlabel(ur"Konzentration in $\mathrm{mol/l}$")
+    pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.savefig("c.pdf")
+    pl.clf()
 
 
 def _parse_args():
