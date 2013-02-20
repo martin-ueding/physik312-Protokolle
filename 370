@@ -26,9 +26,9 @@ def main():
 
 
     def malus(phi, phi0, I0, baseline):
-        return I0 * (np.cos((phi - phi0)*np.pi/180))**2 + baseline
+        return I0 * (np.cos(np.radians(phi - phi0)))**2 + baseline
 
-    popt, pconv = op.curve_fit(malus, phi, U)
+    popt, pconv = op.curve_fit(malus, phi, U, p0=[90, 2, 0])
 
     print "φ₀ = {:.3f} ± {:.3f}, U₀ = {:.3f} ± {:.3f}, U₁ = {:.3f} ± {:.3f}".format(
         popt[0],
