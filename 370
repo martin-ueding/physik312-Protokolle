@@ -183,6 +183,7 @@ def main():
     pl.errorbar(konz, mean, xerr=konz_err, yerr=mean_err, label=u"unbekannte Lösung",
                 linestyle="none", marker="o", color="black")
     pl.plot(plot_x, plot_y, color="black", label="Fit")
+    pl.title(u"Drehvermögen gegen Konzentration")
     pl.xlabel(ur"Konzentration in $\mathrm{mol/l}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
     pl.grid(True)
