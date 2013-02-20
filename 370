@@ -66,9 +66,8 @@ def main():
         PG_err,
     )
     
-    pl.errorbar(phi, U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none",
-                color="black")
-    pl.plot(x, y, label="Fit", color="black")
+    pl.errorbar(phi, U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none")
+    pl.plot(x, y, label="Fit")
     pl.grid(True)
     pl.legend(loc="best")
     pl.title(u"Intensitätstransmission nach zweitem Polfilter")
@@ -116,8 +115,8 @@ def main():
     y = linear(x, *popt)
 
     pl.errorbar(plot_x, plot_y, yerr=plot_y_err, linestyle="none",
-                color="black", marker="+", label="Messdaten")
-    pl.plot(x, y, label="Fit", color="black")
+                marker="+", label="Messdaten")
+    pl.plot(x, y, label="Fit")
     pl.title(u"Drehwinkel als Funktion der Wellenlänge")
     pl.xlabel(ur"$\lambda^{-2}/\mathrm{\mu m^{-2}}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
@@ -178,11 +177,10 @@ def main():
     plot_x = np.linspace(0, max(x), 100)
     plot_y = linear(plot_x, *popt)
 
-    pl.errorbar(x, y, y_err, linestyle="none", marker="+", label="Messdaten",
-                color="black")
-    pl.errorbar(konz, mean, xerr=konz_err, yerr=mean_err, label=u"unbekannte Lösung",
-                linestyle="none", marker="o", color="black")
-    pl.plot(plot_x, plot_y, color="black", label="Fit")
+    pl.errorbar(x, y, y_err, linestyle="none", marker="+", label="Messdaten")
+    pl.errorbar(konz, mean, xerr=konz_err, yerr=mean_err, label=u"unbekannte Konzentration",
+                linestyle="none", marker="o", )
+    pl.plot(plot_x, plot_y, label="Fit")
     pl.title(u"Drehvermögen gegen Konzentration")
     pl.xlabel(ur"Konzentration in $\mathrm{mol/l}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
