@@ -34,18 +34,22 @@ def main():
     I_max_val = popt[1]
     I_min_val = popt[2]
 
-    #I_max_err = np.sqrt(pconv.diagonal())[1]
-    #I_min_err = np.sqrt(pconv.diagonal())[2]
+    I_max_err = np.sqrt(pconv.diagonal())[1]
+    I_min_err = np.sqrt(pconv.diagonal())[2]
 
     PG_val = (I_max_val - I_min_val) / (I_max_val + I_min_val)
+    PG_err = np.sqrt(
+        ((-((I_max_val - I_min_val)/(I_max_val + I_min_val)**2) + 1/(I_max_val + I_min_val)) * I_max_err)**2
+        +((-((I_max_val - I_min_val)/(I_max_val + I_min_val)**2) - 1/(I_max_val + I_min_val) * I_min_err)**2)
+    )
 
     print "I_max = {:.3f} ± {:.3f}, I_min = {:.3f} ± {:.3f}, PG = {:.3f} ± {:.3f}".format(
         I_max_val,
-        0,#I_max_err,
+        I_max_err,
         I_min_val,
-        0,#I_min_err,
+        I_min_err,
         PG_val,
-        0,# PG_err,
+        PG_err,
     )
     
     pl.errorbar(phi, U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none",
