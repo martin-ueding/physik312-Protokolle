@@ -73,9 +73,24 @@ def main():
     b_data["diff"] = diffs
     b_data["err"] = errs
 
-    pl.errorbar((b_data["wavelength"]/10**3)**(-2), b_data["diff"],
-                yerr=b_data["err"], linestyle="none", color="black",
-                marker="+")
+    plot_x = (b_data["wavelength"]/10**3)**(-2)
+    plot_y = b_data["diff"]
+    plot_y_err = b_data["err"]
+
+    def rotation(invers, A, B):
+        return A + invers*B
+
+    popt, pconv = op.curve_fit(rotation, plot_x, plot_y, p0=[-50, 20],
+                               sigma=plot_y_err)
+
+    print popt, pconv
+
+    x = np.linspace(min(plot_x), max(plot_x), 100)
+    y = rotation(x, *popt)
+
+    pl.errorbar(plot_x, plot_y, yerr=plot_y_err, linestyle="none",
+                color="black", marker="+", label="Messdaten")
+    pl.plot(x, y, label="Fit")
     pl.title(u"Drehwinkel als Funktion der Wellenlänge")
     pl.xlabel(ur"$\lambda^{-2}/\mathrm{\mu m^{-2}}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
