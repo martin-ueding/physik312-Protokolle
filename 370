@@ -96,10 +96,10 @@ def main():
     plot_y = np.array([np.mean(diff[wavelength]) for wavelength in wavelengths])
     plot_y_err = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
 
-    def rotation(invers, A, B):
+    def linear(invers, A, B):
         return A + invers*B
 
-    popt, pconv = op.curve_fit(rotation, plot_x, plot_y, sigma=plot_y_err)
+    popt, pconv = op.curve_fit(linear, plot_x, plot_y, sigma=plot_y_err)
 
     col = np.column_stack([plot_x, plot_y, plot_y_err])
     np.savetxt("test.txt", col)
@@ -113,7 +113,7 @@ def main():
     print "B = {:.3f} ± {:.3f}".format(B_val, B_err)
 
     x = np.linspace(min(plot_x), max(plot_x), 100)
-    y = rotation(x, *popt)
+    y = linear(x, *popt)
 
     pl.errorbar(plot_x, plot_y, yerr=plot_y_err, linestyle="none",
                 color="black", marker="+", label="Messdaten")
@@ -142,10 +142,7 @@ def main():
 
         diff = np.degrees(np.arccos(np.abs(np.cos(np.radians(winkel)))))
 
-        print winkel
-        print diff
-
-        diffs.append((float(konz), np.mean(diff), np.std(diff)))
+        diffs.append((float(konz), np.mean(diff), np.sqrt(np.std(diff)**2 + 4)))
 
     diffs = np.array(diffs)
 
@@ -153,7 +150,39 @@ def main():
     y = diffs[:,1]
     y_err = diffs[:,2]
 
-    pl.errorbar(x, y, y_err, linestyle="none", marker="+", label="Messdaten")
+    popt, pconv = op.curve_fit(linear, x, y, sigma=y_err)
+
+    c = popt[1]
+    c_err = np.sqrt(pconv.diagonal()[1])
+
+    print "c = {:.3f} ± {:.3f} °l/mol".format(c, c_err)
+
+    data = np.genfromtxt("c-unbekannt.csv", delimiter="\t")
+
+    winkel = (data[:,0] - data[:,1]) - nullpunkt
+    diff = np.degrees(np.arccos(np.abs(np.cos(np.radians(winkel)))))
+
+    mean = np.mean(diff)
+    mean_err = np.sqrt(np.std(diff)**2 + 4)
+
+    print "Drehfähigkeit der unbekannten Lösung: {:.3f}° ± {:.3f}°".format(mean, mean_err)
+
+    konz = mean/c
+    konz_err = np.sqrt(
+        (mean_err/c)**2
+        + (mean/c**2 * c_err)**2
+    )
+
+    print "Konzentration: {:.3f} ± {:.3f} mol/l".format(konz, konz_err)
+
+    plot_x = np.linspace(0, max(x), 100)
+    plot_y = linear(plot_x, *popt)
+
+    pl.errorbar(x, y, y_err, linestyle="none", marker="+", label="Messdaten",
+                color="black")
+    pl.errorbar(konz, mean, xerr=konz_err, yerr=mean_err, label=u"unbekannte Lösung",
+                linestyle="none", marker="o", color="black")
+    pl.plot(plot_x, plot_y, color="black", label="Fit")
     pl.xlabel(ur"Konzentration in $\mathrm{mol/l}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
     pl.grid(True)
