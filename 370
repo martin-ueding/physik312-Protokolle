@@ -46,7 +46,8 @@ def main():
         0,# PG_err,
     )
     
-    pl.errorbar(a_data.phi, a_data.U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none", color="black")
+    pl.errorbar(a_data.phi, a_data.U, xerr=1, yerr=0.01, label="Messdaten",
+                linestyle="none", color="black")
     pl.plot(x, y, label="Fit", color="black")
     pl.grid(True)
     pl.legend(loc="best")
@@ -78,10 +79,12 @@ def main():
     plot_y_err = b_data["err"]
 
     def rotation(invers, A, B):
-        return A + invers*B
+        return B + invers*A
 
-    popt, pconv = op.curve_fit(rotation, plot_x, plot_y,
-                               sigma=plot_y_err)
+    popt, pconv = op.curve_fit(rotation, plot_x, plot_y, sigma=plot_y_err)
+
+    col = np.column_stack([plot_x, plot_y, plot_y_err])
+    np.savetxt("test.txt", col)
 
     print popt, pconv
 
