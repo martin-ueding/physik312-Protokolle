@@ -80,7 +80,7 @@ def main():
     def rotation(invers, A, B):
         return A + invers*B
 
-    popt, pconv = op.curve_fit(rotation, plot_x, plot_y, p0=[-50, 20],
+    popt, pconv = op.curve_fit(rotation, plot_x, plot_y,
                                sigma=plot_y_err)
 
     print popt, pconv
@@ -90,7 +90,7 @@ def main():
 
     pl.errorbar(plot_x, plot_y, yerr=plot_y_err, linestyle="none",
                 color="black", marker="+", label="Messdaten")
-    pl.plot(x, y, label="Fit")
+    pl.plot(x, y, label="Fit", color="black")
     pl.title(u"Drehwinkel als Funktion der Wellenlänge")
     pl.xlabel(ur"$\lambda^{-2}/\mathrm{\mu m^{-2}}$")
     pl.ylabel(ur"$\phi - \phi_0 / ^\circ$")
