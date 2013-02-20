@@ -26,15 +26,25 @@ def main():
 
     popt, pconv = op.curve_fit(malus, phi, U, p0=[90, 2.1, 0.35])
 
-    print popt, pconv
+    print "φ₀ = {:.3f} ± {:.3f}, U₀ = {:.3f} ± {:.3f}, U₁ = {:.3f} ± {:.3f}".format(
+        popt[0],
+        np.sqrt(pconv.diagonal())[0],
+        popt[1],
+        np.sqrt(pconv.diagonal())[1],
+        popt[2],
+        np.sqrt(pconv.diagonal())[2],
+    )
 
     x = np.linspace(min(phi), max(phi), 100)
     y = malus(x, *popt)
 
-    I_max_val = popt[1]
+    I_max_val = popt[1] + popt[2]
     I_min_val = popt[2]
 
-    I_max_err = np.sqrt(pconv.diagonal())[1]
+    I_max_err = np.sqrt(
+        np.sqrt(pconv.diagonal())[1]**2
+        + np.sqrt(pconv.diagonal())[2]**2
+    )
     I_min_err = np.sqrt(pconv.diagonal())[2]
 
     PG_val = (I_max_val - I_min_val) / (I_max_val + I_min_val)
