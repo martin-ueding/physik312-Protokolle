@@ -13,20 +13,22 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
-    a_data = np.recfromtxt("a.csv", delimiter="\t", dtype=[("phi", "f"), ("U", "f")])
+    a_data = np.genfromtxt("a.csv", delimiter="\t")
 
     dunkelstrom = 0.0082
 
-    a_data.U -= dunkelstrom
+    U = a_data[:,1] - dunkelstrom
+    phi = a_data[:,0]
+
 
     def malus(phi, phi0, I0, baseline):
         return I0 * (np.cos((phi - phi0)*np.pi/180))**2 + baseline
 
-    popt, pconv = op.curve_fit(malus, a_data.phi, a_data.U, p0=[90, 2.1, 0.35])
+    popt, pconv = op.curve_fit(malus, phi, U, p0=[90, 2.1, 0.35])
 
     print popt, pconv
 
-    x = np.linspace(min(a_data.phi), max(a_data.phi), 100)
+    x = np.linspace(min(phi), max(phi), 100)
     y = malus(x, *popt)
 
     I_max_val = popt[1]
@@ -46,8 +48,8 @@ def main():
         0,# PG_err,
     )
     
-    pl.errorbar(a_data.phi, a_data.U, xerr=1, yerr=0.01, label="Messdaten",
-                linestyle="none", color="black")
+    pl.errorbar(phi, U, xerr=1, yerr=0.01, label="Messdaten", linestyle="none",
+                color="black")
     pl.plot(x, y, label="Fit", color="black")
     pl.grid(True)
     pl.legend(loc="best")
@@ -57,26 +59,22 @@ def main():
     pl.savefig("a.pdf")
     pl.clf()
 
+    ####
+
     b = {}
     diff = {}
 
-    wavelengths = [694, 620, 568, 520, 488, 458, 430]
+    wavelengths = [694.0, 620.0, 568.0, 520.0, 488.0, 458.0, 430.0]
 
     for wavelength in wavelengths:
-        b[wavelength] = np.recfromtxt("b-{0}.csv".format(wavelength), delimiter="\t", dtype=[("phi0", "f"), ("phi", "f")])
-        diff[wavelength] = b[wavelength].phi0 - b[wavelength].phi
+        b[wavelength] = np.genfromtxt("b-{0}.csv".format(int(wavelength)), delimiter="\t")
+        phi0 = b[wavelength][:,0]
+        phi = b[wavelength][:,1]
+        diff[wavelength] = phi0 - phi
 
-    b_data = np.zeros(len(wavelengths), dtype=[("wavelength", "f"), ("diff", "f"), ("err", "f")])
-
-    b_data["wavelength"] = np.array(wavelengths)
-    diffs = np.array([np.mean(diff[wavelength]) for wavelength in wavelengths])
-    errs = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
-    b_data["diff"] = diffs
-    b_data["err"] = errs
-
-    plot_x = (b_data["wavelength"]/10**3)**(-2)
-    plot_y = b_data["diff"]
-    plot_y_err = b_data["err"]
+    plot_x = (np.array(wavelengths)/10**3)**(-2)
+    plot_y = np.array([np.mean(diff[wavelength]) for wavelength in wavelengths])
+    plot_y_err = np.array(np.sqrt([np.std(diff[wavelength]) for wavelength in wavelengths]))
 
     def rotation(invers, A, B):
         return B + invers*A
