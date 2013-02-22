@@ -60,7 +60,8 @@ def main():
 
     print "g = {:.3g} ± {:.3g} m".format(g_val, g_err)
 
-    pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+")
+    pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+",
+                color="black")
     pl.grid(True)
     pl.title(u"Auslenkung der blauen Linie")
     pl.xlabel("Ordnung")
