@@ -27,14 +27,38 @@ def main():
     data = np.genfromtxt("b.csv", delimiter="\t")
 
     m = data[:,0]
-    x = (data[:,1] - data[0, 1]) / 100
-    x_err = data[:,2] / 100
+    x = (data[:,1] - data[0, 1]) / 1000
+    x_err = data[:,2] / 1000
 
     alpha = np.arctan(x / a_f)
+    alpha_err = 1.0 / (a_f * (1 + x**2/a_f**2)) * x_err
 
-    print alpha
+    print "m, alpha, alpha_err"
+    print np.column_stack([m, x, x_err])
 
-    pl.errorbar(m, x, yerr=x_err)
+    def linear(x, a):
+        return x * a
+
+    popt, pconv = op.curve_fit(linear, m, x, sigma=x_err)
+
+    a = popt[0]
+    a_err = np.sqrt(pconv.diagonal()[0])
+
+    print "a = {:.3g} ± {:.3g}".format(a, a_err)
+
+    gelb = a_D * a / a_f
+
+    print "λ_gelb = {:.3g}".format(gelb)
+
+    plot_x = np.linspace(0, max(m)+1, 100)
+    plot_y = linear(plot_x, *popt)
+
+    pl.errorbar(m, x, yerr=x_err, linestyle="none", marker="+", color="black",
+                label="Messwerte")
+    pl.plot(plot_x, plot_y, label="Fit", color="black")
+    pl.title(u"Position der Minima des Einzelspalts")
+    pl.xlabel(ur"$m$")
+    pl.ylabel(ur"$x_m / \mathrm{m}$")
     pl.grid(True)
     pl.savefig("b.pdf")
     pl.clf()
