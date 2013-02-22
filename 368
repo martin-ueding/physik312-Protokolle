@@ -71,6 +71,7 @@ def main():
     g_val = np.mean(g)
     g_err = np.std(g) / len(g)
 
+    print "m, phi, g"
     print np.column_stack([m, phi, g])
 
     print "g = {:.3g} ± {:.3g} m".format(g_val, g_err)
