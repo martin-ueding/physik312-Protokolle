@@ -111,9 +111,7 @@ def main():
         + (B * g / b**2 * b_err)**2
     )
 
-    print np.column_stack([m, g, b, G, B])
-
-    print np.column_stack([G, G_err])
+    print np.column_stack([m, g, b, G, G_err, B])
 
     # Auflösungsvermögen des Gitters
     R = 578.01/2.1
