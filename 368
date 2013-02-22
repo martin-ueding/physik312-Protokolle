@@ -96,14 +96,17 @@ def main():
     g = np.array([0, 0, 0.105])
 
     for i in [0, 1]:
-        g[i] = 1.0 / (1/f + 1/b[i])
+        g[i] = 1.0 / (1/f - 1/b[i])
 
     for i in [2]:
-        b[i] = 1.0 / (1/f + 1/g[i])
+        break
+        b[i] = 1.0 / (1/f - 1/g[i])
 
     G = B * g / b
 
     print np.column_stack([m, g, b, G, B])
+
+    print G
 
 
 def _parse_args():
