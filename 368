@@ -72,6 +72,17 @@ def main():
 #                                  Aufgabe e                                  #
 ###############################################################################
 
+    data = np.genfromtxt("e.csv", delimiter="\t")
+
+    m = data[:,0]
+    phi = (data[:,1] - data[:,2])/2 / 100
+
+    blau = 2 * np.sin(phi/2) * g_val / m
+    blau_val = np.mean(blau)
+    blau_err = np.std(blau) / len(blau)
+
+    print "λ_blau = {:.3g} ± {:.3g} m".format(blau_val, blau_err)
+
 ###############################################################################
 #                                  Aufgabe f                                  #
 ###############################################################################
