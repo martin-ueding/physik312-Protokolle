@@ -89,11 +89,21 @@ def main():
 
     f = 0.10
 
-    m = [2, 4, 7]
-    B = [1.4e-2, 0.8e-2, 1.8e-2]
-    B_err = [0.001, 0.001, 0.002]
-    b = [1.0, 1.0, 3.30]
-    g = [0, 0, 0.105]
+    m = np.array([2, 4, 7])
+    B = np.array([1.4e-2, 0.8e-2, 1.8e-2])
+    B_err = np.array([0.001, 0.001, 0.002])
+    b = np.array([1.0, 1.0, 3.30])
+    g = np.array([0, 0, 0.105])
+
+    for i in [0, 1]:
+        g[i] = 1.0 / (1/f + 1/b[i])
+
+    for i in [2]:
+        b[i] = 1.0 / (1/f + 1/g[i])
+
+    G = B * g / b
+
+    print np.column_stack([m, g, b, G, B])
 
 
 def _parse_args():
