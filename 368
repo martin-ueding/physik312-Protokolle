@@ -93,6 +93,7 @@ def main():
     B = np.array([1.4e-2, 0.8e-2, 1.8e-2])
     B_err = np.array([0.001, 0.001, 0.002])
     b = np.array([1.0, 1.0, 3.30])
+    b_err = np.array([0.01, 0.01, 0.2])
     g = np.array([0, 0, 0.105])
 
     for i in [0, 1]:
@@ -103,11 +104,43 @@ def main():
         b[i] = 1.0 / (1/f - 1/g[i])
 
     G = B * g / b
+    G_err = np.sqrt(
+        (g / b * B_err)**2
+        + (B / b * g_err)**2
+        + (B * g / b**2 * b_err)**2
+    )
 
     print np.column_stack([m, g, b, G, B])
 
-    print G
+    print np.column_stack([G, G_err])
 
+    # Auflösungsvermögen des Gitters
+    R = 578.01/2.1
+
+    y = R * g_val / G
+    y_err = np.sqrt(
+        (R / G * g_err)**2
+        + (R * g_val / G**2 * G_err)**2
+    )
+
+    def lin(m, a):
+        return m * a
+
+    popt, pconv = op.curve_fit(lin, m, y, sigma=y_err)
+
+    plot_x = np.linspace(0, 8, 100)
+    plot_y = lin(plot_x, *popt)
+
+    pl.errorbar(m, y, yerr=y_err, linestyle="none", marker="o", color="black",
+                label="Messdaten")
+    pl.plot(plot_x, plot_y, color="black", label="Fit")
+    pl.legend(loc="best")
+    pl.title(u"Auflösungsvermögen des Gitters")
+    pl.xlabel(ur"$m$")
+    pl.ylabel(ur"$R/N$")
+    pl.grid(True)
+    pl.savefig("f.pdf")
+    pl.clf()
 
 def _parse_args():
     """
