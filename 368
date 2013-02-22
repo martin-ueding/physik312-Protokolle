@@ -45,12 +45,21 @@ def main():
     data = np.genfromtxt("d.csv", delimiter="\t")
 
     m = data[:,0]
-    phi = (data[:,1] - data[:,2])/2
+    phi = (data[:,1] - data[:,2])/2 / 100
 
     phi_err = 0.3e-3
 
+    gruen = 546.07e-9
+
+    g = m * gruen / (2 * np.sin(phi/2))
+
+    print g
+
     pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+")
     pl.grid(True)
+    pl.title(u"Auslenkung der blauen Linie")
+    pl.xlabel("Ordnung")
+    pl.ylabel(ur"Auslenkung $\phi / \mathrm{rad}$")
     pl.savefig("d.pdf")
     pl.clf()
 
