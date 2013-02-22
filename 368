@@ -53,7 +53,12 @@ def main():
 
     g = m * gruen / (2 * np.sin(phi/2))
 
-    print g
+    g_val = np.mean(g)
+    g_err = np.std(g) / len(g)
+
+    print np.column_stack([m, phi, g])
+
+    print "g = {:.3g} ± {:.3g} m".format(g_val, g_err)
 
     pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+")
     pl.grid(True)
