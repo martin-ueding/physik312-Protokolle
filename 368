@@ -26,7 +26,15 @@ def main():
 
     data = np.genfromtxt("b.csv", delimiter="\t")
 
-    pl.errorbar(data[:,0], data[:,1] - data[0,1], yerr=data[:,2])
+    m = data[:,0]
+    x = (data[:,1] - data[0, 1]) / 100
+    x_err = data[:,2] / 100
+
+    alpha = np.arctan(x / a_f)
+
+    print alpha
+
+    pl.errorbar(m, x, yerr=x_err)
     pl.grid(True)
     pl.savefig("b.pdf")
     pl.clf()
