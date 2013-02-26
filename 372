@@ -4,11 +4,33 @@
 # Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
 
 import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
 
 __docformat__ = "restructuredtext en"
 
 def main():
     options = _parse_args()
+
+    data = np.genfromtxt("a-leer.csv", delimiter="\t")
+    t = data[:,0]
+    U = data[:,1]
+    U_err = 0.7
+
+    pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
+    pl.grid(True)
+    pl.savefig("Plot_a-leer.pdf")
+    pl.clf()
+
+    data = np.genfromtxt("a-Lampe.csv", delimiter="\t")
+    t = data[:,0]
+    U = data[:,1]
+
+    pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
+    pl.grid(True)
+    pl.savefig("Plot_a-Lampe.pdf")
+    pl.clf()
 
 
 def _parse_args():
