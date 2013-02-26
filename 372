@@ -128,6 +128,11 @@ def main():
     pl.savefig("Plot_c-erste.pdf")
     pl.clf()
 
+    data = np.genfromtxt("c-zweite.csv", delimiter="\t")
+    U1 = data[:,0]
+    I1 = data[:,1]
+    U2 = data[:,2]
+
 def _parse_args():
     """
     Parses the command line arguments.
