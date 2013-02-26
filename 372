@@ -56,8 +56,10 @@ def main():
 
     T_err = 0.3
 
-    def boltzmann(T, sigma, offset):
-        return sigma * T**4 + offset
+    sigma = 5.670373e-8
+
+    def boltzmann(T, epsilon, offset):
+        return epsilon * sigma * T**4 + offset
 
     glanz_popt, glanz_pconv = op.curve_fit(boltzmann, glanz[:,0], glanz[:,1]-offset)
     matt_popt, matt_pconv = op.curve_fit(boltzmann, matt[:,0], matt[:,1]-offset)
@@ -79,6 +81,11 @@ def main():
     weiss_x = np.linspace(min(weiss[:,0]), max(weiss[:,0]))
     weiss_y = boltzmann(weiss_x, *weiss_popt)
     pl.plot(weiss_x, weiss_y, label="Fit weiss", color="gray")
+
+    print "glanz ε = {:.3g} ± {:.3g}".format(glanz_popt[0], np.sqrt(glanz_pconv.diagonal()[0]))
+    print "matt ε = {:.3g} ± {:.3g}".format(matt_popt[0], np.sqrt(matt_pconv.diagonal()[0]))
+    print "schwarz ε = {:.3g} ± {:.3g}".format(schwarz_popt[0], np.sqrt(schwarz_pconv.diagonal()[0]))
+    print "weiss ε = {:.3g} ± {:.3g}".format(weiss_popt[0], np.sqrt(weiss_pconv.diagonal()[0]))
 
     pl.errorbar(glanz[:,0], glanz[:,1]-offset, xerr=T_err, yerr=U_err,
                 label="glanz", color="gold", linestyle="none")
