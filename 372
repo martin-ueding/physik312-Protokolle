@@ -104,6 +104,30 @@ def main():
     pl.clf()
 
 
+    data = np.genfromtxt("c-erste.csv", delimiter="\t")
+    d = data[:,0]
+    U = data[:,1]
+
+    def c(d, I0, d0, offset):
+        return I0 / (d - d0)**2 + offset
+
+    d_err = 0.001
+    U_err = 0.001
+
+    popt, pconv = op.curve_fit(c, d, U)
+
+    x = np.linspace(min(d), max(d))
+    y = c(x, *popt)
+
+    pl.plot(x, y, label="Fit")
+
+    pl.errorbar(d, U, xerr=d_err, yerr=U_err, linestyle="none", marker="+",
+                label="Messdaten")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.savefig("Plot_c-erste.pdf")
+    pl.clf()
+
 def _parse_args():
     """
     Parses the command line arguments.
