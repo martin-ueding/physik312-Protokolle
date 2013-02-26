@@ -47,15 +47,17 @@ def main():
     schwarz = np.genfromtxt("b-schwarz.csv", delimiter="\t")
     weiss = np.genfromtxt("b-weiss.csv", delimiter="\t")
 
-    glanz[:,0] += 273.16
-    matt[:,0] += 273.16
-    schwarz[:,0] += 273.16
-    weiss[:,0] += 273.16
+    T0 = 19.0
+
+    glanz[:,0] += 273.15
+    matt[:,0] += 273.15
+    schwarz[:,0] += 273.15
+    weiss[:,0] += 273.15
 
     T_err = 0.3
 
-    def boltzmann(T, sigma):
-        return sigma * T**4
+    def boltzmann(T, sigma, offset):
+        return sigma * T**4 + offset
 
     glanz_popt, glanz_pconv = op.curve_fit(boltzmann, glanz[:,0], glanz[:,1]-offset)
     matt_popt, matt_pconv = op.curve_fit(boltzmann, matt[:,0], matt[:,1]-offset)
