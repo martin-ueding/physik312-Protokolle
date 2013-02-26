@@ -18,18 +18,80 @@ def main():
     U = data[:,1]
     U_err = 0.7
 
+    offset = 7.8/10
+
+    print "Maximale Spannung: {:.3g} mV".format(offset)
+
     pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
     pl.grid(True)
+    pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
+    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
     pl.savefig("Plot_a-leer.pdf")
     pl.clf()
 
     data = np.genfromtxt("a-Lampe.csv", delimiter="\t")
     t = data[:,0]
-    U = data[:,1]
+    U = data[:,1] - offset
 
     pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
     pl.grid(True)
+    pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
+    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
     pl.savefig("Plot_a-Lampe.pdf")
+    pl.clf()
+
+    # Lesliewürfel
+
+    glanz = np.genfromtxt("b-glanz.csv", delimiter="\t")
+    matt = np.genfromtxt("b-matt.csv", delimiter="\t")
+    schwarz = np.genfromtxt("b-schwarz.csv", delimiter="\t")
+    weiss = np.genfromtxt("b-weiss.csv", delimiter="\t")
+
+    glanz[:,0] += 273.16
+    matt[:,0] += 273.16
+    schwarz[:,0] += 273.16
+    weiss[:,0] += 273.16
+
+    T_err = 0.3
+
+    def boltzmann(T, sigma):
+        return sigma * T**4
+
+    glanz_popt, glanz_pconv = op.curve_fit(boltzmann, glanz[:,0], glanz[:,1]-offset)
+    matt_popt, matt_pconv = op.curve_fit(boltzmann, matt[:,0], matt[:,1]-offset)
+    schwarz_popt, schwarz_pconv = op.curve_fit(boltzmann, schwarz[:,0], schwarz[:,1]-offset)
+    weiss_popt, weiss_pconv = op.curve_fit(boltzmann, weiss[:,0], weiss[:,1]-offset)
+
+    glanz_x = np.linspace(min(glanz[:,0]), max(glanz[:,0]))
+    glanz_y = boltzmann(glanz_x, *glanz_popt)
+    pl.plot(glanz_x, glanz_y, label="Fit glanz", color="gold")
+
+    matt_x = np.linspace(min(matt[:,0]), max(matt[:,0]))
+    matt_y = boltzmann(matt_x, *matt_popt)
+    pl.plot(matt_x, matt_y, label="Fit matt", color="yellow")
+
+    schwarz_x = np.linspace(min(schwarz[:,0]), max(schwarz[:,0]))
+    schwarz_y = boltzmann(schwarz_x, *schwarz_popt)
+    pl.plot(schwarz_x, schwarz_y, label="Fit schwarz", color="black")
+
+    weiss_x = np.linspace(min(weiss[:,0]), max(weiss[:,0]))
+    weiss_y = boltzmann(weiss_x, *weiss_popt)
+    pl.plot(weiss_x, weiss_y, label="Fit weiss", color="gray")
+
+    pl.errorbar(glanz[:,0], glanz[:,1]-offset, xerr=T_err, yerr=U_err,
+                label="glanz", color="gold", linestyle="none")
+    pl.errorbar(matt[:,0], matt[:,1]-offset, xerr=T_err, yerr=U_err,
+                label="matt", color="yellow", linestyle="none")
+    pl.errorbar(schwarz[:,0], schwarz[:,1]-offset, xerr=T_err, yerr=U_err,
+                label="schwarz", color="black", linestyle="none")
+    pl.errorbar(weiss[:,0], weiss[:,1]-offset, xerr=T_err, yerr=U_err,
+                label="weiss", color="gray", linestyle="none")
+    pl.grid(True)
+    pl.title(u"Lesliewürfel")
+    pl.xlabel(ur"Temperatur $T / \mathrm{K}$")
+    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
+    pl.legend(loc="best")
+    pl.savefig("Plot_b.pdf")
     pl.clf()
 
 
