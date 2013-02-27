@@ -13,30 +13,44 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
+    # Sensitivität der Thermosäule
+    S = 30e-6
+
+    V = 1000
+
     data = np.genfromtxt("a-leer.csv", delimiter="\t")
     t = data[:,0]
-    U = data[:,1]
-    U_err = 0.7
+    U = data[:,1] / V / 1000
+    U_err = 0.7e-3 / V
 
-    offset = 7.8/10
+    offset = np.mean(U[-3:])
 
-    print "Maximale Spannung: {:.3g} mV".format(offset)
+    print "Offset: {:.3g} V".format(offset)
 
-    pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
+    pl.errorbar(t, U * 10**6, yerr=U_err * 10**6, linestyle="none", marker="+")
     pl.grid(True)
+    pl.title(u"Bestimmung des Offsets")
     pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
-    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
+    pl.ylabel(ur"Thermospannung $U / \mathrm{\mu V}$")
     pl.savefig("Plot_a-leer.pdf")
     pl.clf()
 
     data = np.genfromtxt("a-Lampe.csv", delimiter="\t")
     t = data[:,0]
-    U = data[:,1] - offset
+    U = data[:,1] / V / 1000 - offset
+    U_err = 0.7e-3 / V
 
-    pl.errorbar(t, U, yerr=U_err, linestyle="none", marker="+")
+    x = np.linspace(min(t), max(t))
+    y = np.ones(x.size) * max(U) * 0.9
+    pl.plot(x, y * 10**6, label=ur"$90\%$")
+
+    pl.errorbar(t, U * 10**6, yerr=U_err * 10**6, linestyle="none", marker="+",
+                label="Messdaten")
     pl.grid(True)
+    pl.legend(loc="best")
+    pl.title(u"Bestimmung der Ansprechzeit")
     pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
-    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
+    pl.ylabel(ur"Thermospannung $U / \mathrm{\mu V}$")
     pl.savefig("Plot_a-Lampe.pdf")
     pl.clf()
 
@@ -53,6 +67,11 @@ def main():
     matt[:,0] += 273.15
     schwarz[:,0] += 273.15
     weiss[:,0] += 273.15
+
+    glanz[:,1] /= 1000 * V
+    matt[:,1] /= 1000 * V
+    schwarz[:,1] /= 1000 * V
+    weiss[:,1] /= 1000 * V
 
     T_err = 0.3
 
