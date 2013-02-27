@@ -1,2 +1,9 @@
 *.pdf
+
 *.xoj
+
+Druckvorlage.aux
+Druckvorlage.fdb_latexmk
+Druckvorlage.log
+Druckvorlage.out
+Umformung.nb
