@@ -158,7 +158,8 @@ def main():
 
     data = np.genfromtxt("c-erste.csv", delimiter="\t")
     d = data[:,0]
-    U = data[:,1]
+    U = data[:,1] / V
+    phi = phif(U)
 
     def c(d, I0, d0, offset):
         return I0 / (d - d0)**2 + offset
@@ -166,16 +167,17 @@ def main():
     d_err = 0.001
     U_err = 0.001
 
-    popt, pconv = op.curve_fit(c, d, U)
+    #popt, pconv = op.curve_fit(c, d, U)
 
-    x = np.linspace(min(d), max(d))
-    y = c(x, *popt)
+    #x = np.linspace(min(d), max(d))
+    #y = c(x, *popt)
 
-    pl.plot(x, y, label="Fit")
+    #pl.plot(x, y, label="Fit")
 
-    pl.errorbar(d, U, xerr=d_err, yerr=U_err, linestyle="none", marker="+",
+    pl.errorbar(d, phi, xerr=d_err, yerr=U_err, linestyle="none", marker="+",
                 label="Messdaten")
     pl.grid(True)
+    pl.title(u"Halogenlampe bei verschiedenen Leistungen")
     pl.legend(loc="best")
     pl.savefig("Plot_c-erste.pdf")
     pl.clf()
@@ -183,7 +185,24 @@ def main():
     data = np.genfromtxt("c-zweite.csv", delimiter="\t")
     U1 = data[:,0]
     I1 = data[:,1]
-    U2 = data[:,2]
+    U2 = data[:,2] / V
+
+    p = U1 * I1
+    R = U1 / I1
+    phi = phif(U2)
+
+    alpha = 4.82e-3
+    beta = 6.76e-7
+
+    R0 = 0.35
+
+    T = (-alpha*R0 + np.sqrt(R0)*np.sqrt(4*beta*R + alpha**2*R0 - 4*beta*R0) + 
+ 2*beta*R0*T0)/(2*beta*R0)
+
+    pl.plot(T, phi)
+    pl.grid(True)
+    pl.savefig("Plot_c-zweite.pdf")
+    pl.clf()
 
 def _parse_args():
     """
