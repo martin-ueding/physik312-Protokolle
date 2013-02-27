@@ -10,10 +10,10 @@ import scipy.optimize as op
 
 __docformat__ = "restructuredtext en"
 
-def phif(U):
-    # Sensitivität der Thermosäule
-    S = 30e-6
+# Sensitivität der Thermosäule
+S = 30e-6
 
+def phif(U):
     return U / S
 
 def main():
@@ -28,12 +28,18 @@ def main():
 
     offset = np.mean(U[-3:])
 
+    x = np.linspace(min(t), max(t))
+    y = np.ones(x.size) * offset
+    pl.plot(x, y * 10**6, label="Offset")
+
     print "Offset: {:.3g} V".format(offset)
 
-    pl.errorbar(t, U * 10**6, yerr=U_err * 10**6, linestyle="none", marker="+")
+    pl.errorbar(t, U * 10**6, yerr=U_err * 10**6, linestyle="none", marker="+",
+                label="Messdaten")
     pl.grid(True)
+    pl.legend(loc="best")
     pl.title(u"Bestimmung des Offsets")
-    pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
+    pl.xlabel(ur"Zeit $t / \mathrm{s}$")
     pl.ylabel(ur"Thermospannung $U / \mathrm{\mu V}$")
     pl.savefig("Plot_a-leer.pdf")
     pl.clf()
@@ -54,7 +60,7 @@ def main():
     pl.grid(True)
     pl.legend(loc="best")
     pl.title(u"Bestimmung der Ansprechzeit")
-    pl.xlabel(ur"Temperatur $T / ^\circ\mathrm{C}$")
+    pl.xlabel(ur"Zeit $t / \mathrm{s}$")
     pl.ylabel(ur"Thermospannung $U / \mathrm{\mu V}$")
     pl.savefig("Plot_a-Lampe.pdf")
     pl.clf()
@@ -67,6 +73,7 @@ def main():
     weiss = np.genfromtxt("b-weiss.csv", delimiter="\t")
 
     T0 = 19.0 + 273.15
+    T0_err = 1.0
 
     glanz[:,0] += 273.15
     matt[:,0] += 273.15
@@ -144,7 +151,7 @@ def main():
     offset = - epsilon * sigma * T0**4
     print "ideal offset = {:.3g}".format(offset)
     y = boltzmann(x, epsilon, offset)
-    pl.plot(x, y, label="schwarzer Strahler")
+    pl.plot(x, y, label=ur"$\epsilon = 0.1$")
 
 
     pl.grid(True)
@@ -157,27 +164,31 @@ def main():
 
 
     data = np.genfromtxt("c-erste.csv", delimiter="\t")
-    d = data[:,0]
+    d = data[:,0] / 100
     U = data[:,1] / V
     phi = phif(U)
 
-    def c(d, I0, d0, offset):
-        return I0 / (d - d0)**2 + offset
+    def c(x, a, b):
+        return a*x + b
 
-    d_err = 0.001
-    U_err = 0.001
 
-    #popt, pconv = op.curve_fit(c, d, U)
+    dx = d**(-2)
+    dy = phi
 
-    #x = np.linspace(min(d), max(d))
-    #y = c(x, *popt)
+    dx_err = np.abs(-2 * d**(-3)) * 0.001
+    dy_err = 0.001 / S
 
-    #pl.plot(x, y, label="Fit")
+    popt, pconv = op.curve_fit(c, dx, dy)
+    x = np.linspace(min(dx), max(dx))
+    y = c(x, *popt)
+    pl.plot(x, y, label="Fit")
 
-    pl.errorbar(d, phi, xerr=d_err, yerr=U_err, linestyle="none", marker="+",
-                label="Messdaten")
+    pl.errorbar(dx, dy, xerr=dx_err, yerr=dy_err, linestyle="none",
+                marker="+", label="Messdaten")
     pl.grid(True)
-    pl.title(u"Halogenlampe bei verschiedenen Leistungen")
+    pl.title(u"Halogenlampe bei verschiedenen Abständen")
+    pl.xlabel(ur"Abstand $d^{-2} / \mathrm{m^{-2}}$")
+    pl.ylabel(ur"Strahlungsfluss $\frac{\Phi}{F} / \mathrm{\frac{W}{m^2}}$")
     pl.legend(loc="best")
     pl.savefig("Plot_c-erste.pdf")
     pl.clf()
@@ -187,20 +198,51 @@ def main():
     I1 = data[:,1]
     U2 = data[:,2] / V
 
+    U_err = 0.001
+    I_err = 0.01
+
     p = U1 * I1
     R = U1 / I1
+    R_err = np.sqrt(
+        (1/I1 * U_err)**2
+        + (U1/I1**2 * I_err)**2
+    )
+
     phi = phif(U2)
+    phi_err = U_err / S
 
     alpha = 4.82e-3
     beta = 6.76e-7
 
     R0 = 0.35
+    R0_err = 0.05
 
     T = (-alpha*R0 + np.sqrt(R0)*np.sqrt(4*beta*R + alpha**2*R0 - 4*beta*R0) + 
  2*beta*R0*T0)/(2*beta*R0)
 
-    pl.plot(T, phi)
+    popt, pconv = op.curve_fit(boltzmann, T, phi, sigma=phi_err)
+    x = np.linspace(min(T), max(T))
+    y = boltzmann(x, *popt)
+    pl.plot(x, y, label="Fit")
+
+    epsilon = popt[0]
+    epsilon_err = np.sqrt(pconv.diagonal()[0])
+
+    print "ε = {:.3g} ± {:.3g}".format(epsilon, epsilon_err)
+
+    f1 = (1/(np.sqrt(R0)*np.sqrt(4*beta*R + alpha**2*R0 - 4*beta*R0))) * R_err
+    f2 = T0_err
+    f3 = ((-alpha + ((alpha**2 - 4*beta)*np.sqrt(R0))/( 2*np.sqrt(4*beta*R + alpha**2*R0 - 4*beta*R0)) + np.sqrt( 4*beta*R + alpha**2*R0 - 4*beta*R0)/(2*np.sqrt(R0)) + 2*beta*T0)/( 2*beta*R0) - (-alpha*R0 + np.sqrt(R0)*np.sqrt(4*beta*R + alpha**2*R0 - 4*beta*R0) + 2*beta*R0*T0)/( 2*beta*R0**2)) * R0_err
+
+    T_err = np.sqrt(f1**2 + f2**2 + f3**2)
+
+    pl.errorbar(T, phi, xerr=T_err, yerr=phi_err, label="Messdaten",
+                linestyle="none", marker="+")
     pl.grid(True)
+    pl.legend(loc="best")
+    pl.title(u"Halogenlampe bei verschiedenen Leistungen")
+    pl.xlabel(u"Temperatur $T / \mathrm{K}$")
+    pl.ylabel(ur"Strahlungsfluss $\frac{\Phi}{F} / \mathrm{\frac{W}{m^2}}$")
     pl.savefig("Plot_c-zweite.pdf")
     pl.clf()
 
