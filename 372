@@ -10,11 +10,14 @@ import scipy.optimize as op
 
 __docformat__ = "restructuredtext en"
 
-def main():
-    options = _parse_args()
-
+def phif(U):
     # Sensitivität der Thermosäule
     S = 30e-6
+
+    return U / S
+
+def main():
+    options = _parse_args()
 
     V = 1000
 
@@ -34,6 +37,8 @@ def main():
     pl.ylabel(ur"Thermospannung $U / \mathrm{\mu V}$")
     pl.savefig("Plot_a-leer.pdf")
     pl.clf()
+
+    V = 100
 
     data = np.genfromtxt("a-Lampe.csv", delimiter="\t")
     t = data[:,0]
@@ -61,7 +66,7 @@ def main():
     schwarz = np.genfromtxt("b-schwarz.csv", delimiter="\t")
     weiss = np.genfromtxt("b-weiss.csv", delimiter="\t")
 
-    T0 = 19.0
+    T0 = 19.0 + 273.15
 
     glanz[:,0] += 273.15
     matt[:,0] += 273.15
@@ -73,6 +78,16 @@ def main():
     schwarz[:,1] /= 1000 * V
     weiss[:,1] /= 1000 * V
 
+    glanz[:,1] -= offset
+    matt[:,1] -= offset
+    schwarz[:,1] -= offset
+    weiss[:,1] -= offset
+
+    glanz_phi = phif(glanz[:,1])
+    matt_phi = phif(matt[:,1])
+    schwarz_phi = phif(schwarz[:,1])
+    weiss_phi = phif(weiss[:,1])
+
     T_err = 0.3
 
     sigma = 5.670373e-8
@@ -80,10 +95,10 @@ def main():
     def boltzmann(T, epsilon, offset):
         return epsilon * sigma * T**4 + offset
 
-    glanz_popt, glanz_pconv = op.curve_fit(boltzmann, glanz[:,0], glanz[:,1]-offset)
-    matt_popt, matt_pconv = op.curve_fit(boltzmann, matt[:,0], matt[:,1]-offset)
-    schwarz_popt, schwarz_pconv = op.curve_fit(boltzmann, schwarz[:,0], schwarz[:,1]-offset)
-    weiss_popt, weiss_pconv = op.curve_fit(boltzmann, weiss[:,0], weiss[:,1]-offset)
+    glanz_popt, glanz_pconv = op.curve_fit(boltzmann, glanz[:,0], glanz_phi)
+    matt_popt, matt_pconv = op.curve_fit(boltzmann, matt[:,0], matt_phi)
+    schwarz_popt, schwarz_pconv = op.curve_fit(boltzmann, schwarz[:,0], schwarz_phi)
+    weiss_popt, weiss_pconv = op.curve_fit(boltzmann, weiss[:,0], weiss_phi)
 
     glanz_x = np.linspace(min(glanz[:,0]), max(glanz[:,0]))
     glanz_y = boltzmann(glanz_x, *glanz_popt)
@@ -102,23 +117,41 @@ def main():
     pl.plot(weiss_x, weiss_y, label="Fit weiss", color="gray")
 
     print "glanz ε = {:.3g} ± {:.3g}".format(glanz_popt[0], np.sqrt(glanz_pconv.diagonal()[0]))
+    print "glanz offset = {:.3g} ± {:.3g}".format(glanz_popt[1], np.sqrt(glanz_pconv.diagonal()[1]))
     print "matt ε = {:.3g} ± {:.3g}".format(matt_popt[0], np.sqrt(matt_pconv.diagonal()[0]))
+    print "matt offset = {:.3g} ± {:.3g}".format(matt_popt[1], np.sqrt(matt_pconv.diagonal()[1]))
     print "schwarz ε = {:.3g} ± {:.3g}".format(schwarz_popt[0], np.sqrt(schwarz_pconv.diagonal()[0]))
+    print "schwarz offset = {:.3g} ± {:.3g}".format(schwarz_popt[1], np.sqrt(schwarz_pconv.diagonal()[1]))
     print "weiss ε = {:.3g} ± {:.3g}".format(weiss_popt[0], np.sqrt(weiss_pconv.diagonal()[0]))
+    print "weiss offset = {:.3g} ± {:.3g}".format(weiss_popt[1], np.sqrt(weiss_pconv.diagonal()[1]))
 
-    pl.errorbar(glanz[:,0], glanz[:,1]-offset, xerr=T_err, yerr=U_err,
+    pl.errorbar(glanz[:,0], glanz_phi, xerr=T_err, yerr=U_err,
                 label="glanz", color="gold", linestyle="none")
-    pl.errorbar(matt[:,0], matt[:,1]-offset, xerr=T_err, yerr=U_err,
+    pl.errorbar(matt[:,0], matt_phi, xerr=T_err, yerr=U_err,
                 label="matt", color="yellow", linestyle="none")
-    pl.errorbar(schwarz[:,0], schwarz[:,1]-offset, xerr=T_err, yerr=U_err,
+    pl.errorbar(schwarz[:,0], schwarz_phi, xerr=T_err, yerr=U_err,
                 label="schwarz", color="black", linestyle="none")
-    pl.errorbar(weiss[:,0], weiss[:,1]-offset, xerr=T_err, yerr=U_err,
+    pl.errorbar(weiss[:,0], weiss_phi, xerr=T_err, yerr=U_err,
                 label="weiss", color="gray", linestyle="none")
+
+    epsilon = 0.1
+
+    x = np.linspace(min([min(x) for x in [glanz[:,0], matt[:,0], schwarz[:,0],
+                                          weiss[:,0]]]),
+                    max([max(x) for x in [glanz[:,0], matt[:,0], schwarz[:,0],
+                                          weiss[:,0]]]),
+                    100)
+    offset = - epsilon * sigma * T0**4
+    print "ideal offset = {:.3g}".format(offset)
+    y = boltzmann(x, epsilon, offset)
+    pl.plot(x, y, label="schwarzer Strahler")
+
+
     pl.grid(True)
     pl.title(u"Lesliewürfel")
     pl.xlabel(ur"Temperatur $T / \mathrm{K}$")
-    pl.ylabel(ur"Thermospannung $U / \mathrm{mV}$")
-    pl.legend(loc="best")
+    pl.ylabel(ur"Strahlungsfluss $\frac{\Phi}{F} / \mathrm{\frac{W}{m^2}}$")
+    pl.legend(loc="best", prop={"size": 12})
     pl.savefig("Plot_b.pdf")
     pl.clf()
 
