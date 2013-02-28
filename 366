@@ -13,18 +13,26 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
+###############################################################################
+#                                  Aufgabe b                                  #
+###############################################################################
+
     data = np.genfromtxt("b.csv")
     alpha = np.radians(data[:,0] + data[:,1] / 60)
-    alpha_err = np.radians(2.0/60)
+    alpha_err = np.radians(5.0/60)
     gamma = np.abs(alpha[0] - alpha[1]) / 2
     gamma_err = np.sqrt(2) * (alpha_err / 2)
 
     print "γ = {:.3g} ± {:.3g} rad".format(gamma, gamma_err)
 
+###############################################################################
+#                                  Aufgabe c                                  #
+###############################################################################
+
     namen = [u"rot", u"gelb", u"grün", u"cyan", u"blau 1", u"blau 2", u"blau 3", u"violett"]
 
     data = np.genfromtxt("c.csv")
-    lambda_ = data[:,0]
+    lambda_ = data[:,0] / 10**9
     alpha = np.column_stack([
         np.radians(data[:,1] + data[:,2] / 60),
         np.radians(data[:,3] + data[:,4] / 60),
@@ -42,11 +50,14 @@ def main():
     popt, pconv = op.curve_fit(cauchy, lambda_, delta)
     x = np.linspace(min(lambda_), max(lambda_))
     y = cauchy(x, *popt)
-    pl.plot(x, y, label=u"Cauchy-Fit")
+    pl.plot(x * 10**9, y, label=u"Cauchy-Fit")
 
     print np.column_stack([popt, np.sqrt(pconv.diagonal())])
 
-    pl.errorbar(lambda_, delta, yerr=delta_err, label="Messdaten",
+    k1 = popt[1]
+    k1_err = np.sqrt(pconv.diagonal()[1])
+
+    pl.errorbar(lambda_ * 10**9, delta, yerr=delta_err, label="Messdaten",
                 linestyle="none", marker="+")
     pl.grid(True)
     pl.legend(loc="best")
@@ -55,6 +66,40 @@ def main():
     pl.ylabel(ur"Ablenkwinkel $\delta / \mathrm{rad}$")
     pl.savefig("Plot_c.pdf")
     pl.clf()
+
+    B = 1.5e-3
+    B_err = 1.0e-3
+
+    print "k1", k1
+
+    # Auflösungsvermögen
+    A = 2 * k1 / (lambda_)**3 * B
+    A_err = np.sqrt(
+        (2 * k1 / (lambda_)**3 * B_err)**2
+        + (2 * B / lambda_**3 * k1_err)**2
+    )
+
+    print "A[1]", A[1], A_err[1]
+
+    # Benötigtes Auflösungsvermögen für die gelben Linien:
+    l1 = 579.06
+    l2 = 576.96
+    R = np.abs(np.mean([l1, l2]) / (l1-l2))
+
+    print "R", R
+
+###############################################################################
+#                                  Aufgabe d                                  #
+###############################################################################
+
+    data = np.genfromtxt("d.csv")
+    alpha = np.column_stack([
+        np.radians(data[:,0] + data[:,1] / 60),
+        np.radians(data[:,2] + data[:,3] / 60),
+    ])
+
+    delta = (alpha[:,1] - alpha[:,0])/2
+    delta_err = np.ones(delta.size) * alpha_err
 
 def _parse_args():
     """
