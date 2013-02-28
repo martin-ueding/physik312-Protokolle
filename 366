@@ -23,7 +23,7 @@ def main():
     gamma = np.abs(alpha[0] - alpha[1]) / 2
     gamma_err = np.sqrt(2) * (alpha_err / 2)
 
-    print "γ = {:.3g} ± {:.3g} rad".format(gamma, gamma_err)
+    print "γ = {:.6g} ± {:.3g} rad".format(gamma, gamma_err)
 
 ###############################################################################
 #                                  Aufgabe c                                  #
@@ -41,36 +41,43 @@ def main():
     delta = (alpha[:,1] - alpha[:,0])/2
     delta_err = np.ones(delta.size) * alpha_err
 
+    n = np.sin((delta + gamma)/2) / np.sin(gamma/2)
+    n_err = np.sqrt(
+        (0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) * delta_err)**2
+        + ((0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) - 0.5 / np.tan(gamma/2) / np.sin(gamma/2) * np.sin((delta+gamma)/2)) * gamma_err)**2
+    )
+
     for name, d in zip(namen, delta):
-        print name, d
+        print name, d, "rad"
 
     def cauchy(lambda_, k1, k2):
         return k1 + k2 / lambda_**2
 
-    popt, pconv = op.curve_fit(cauchy, lambda_, delta)
+    popt, pconv = op.curve_fit(cauchy, lambda_, n, sigma=n_err)
     x = np.linspace(min(lambda_), max(lambda_))
     y = cauchy(x, *popt)
-    pl.plot(x * 10**9, y, label=u"Cauchy-Fit")
+    pl.plot(x * 10**9, y, label=u"Cauchy-Fit", color="black")
 
-    print np.column_stack([popt, np.sqrt(pconv.diagonal())])
-
+    k0 = popt[0]
+    k0_err = np.sqrt(pconv.diagonal()[0])
     k1 = popt[1]
     k1_err = np.sqrt(pconv.diagonal()[1])
 
-    pl.errorbar(lambda_ * 10**9, delta, yerr=delta_err, label="Messdaten",
-                linestyle="none", marker="+")
+    pl.errorbar(lambda_ * 10**9, n, yerr=n_err, label="Messdaten",
+                linestyle="none", marker="+", color="black")
     pl.grid(True)
     pl.legend(loc="best")
     pl.title(u"Quecksilber-Cadmium-Lampe")
     pl.xlabel(ur"Wellenlänge $\lambda / \mathrm{nm}$")
-    pl.ylabel(ur"Ablenkwinkel $\delta / \mathrm{rad}$")
+    pl.ylabel(ur"Brechungsindex $n$")
     pl.savefig("Plot_c.pdf")
     pl.clf()
 
     B = 1.5e-3
     B_err = 1.0e-3
 
-    print "k1", k1
+    print "k0", k0, "±", k0_err
+    print "k1", k1, "±", k1_err
 
     # Auflösungsvermögen
     A = 2 * k1 / (lambda_)**3 * B
@@ -100,6 +107,25 @@ def main():
 
     delta = (alpha[:,1] - alpha[:,0])/2
     delta_err = np.ones(delta.size) * alpha_err
+
+    print delta
+
+    n = np.sin((delta + gamma)/2) / np.sin(gamma/2)
+    n_err = np.sqrt(
+        (0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) * delta_err)**2
+        + ((0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) - 0.5 / np.tan(gamma/2) / np.sin(gamma/2) * np.sin((delta+gamma)/2)) * gamma_err)**2
+    )
+
+    print np.column_stack([n, n_err])
+
+    lambda_ = np.sqrt(k1/(n - k0))
+    lambda_err = np.sqrt(
+        (k1 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)**2) * n_err)**2
+        + (k1 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)**2) * k0_err)**2
+        + (1.0 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)) * k1_err)**2
+    )
+
+    print np.column_stack([lambda_, lambda_err]) * 10**9
 
 def _parse_args():
     """
