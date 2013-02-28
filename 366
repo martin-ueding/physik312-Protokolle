@@ -31,6 +31,7 @@ def main():
     ])
 
     delta = (alpha[:,1] - alpha[:,0])/2
+    delta_err = np.ones(delta.size) * alpha_err
 
     for name, d in zip(namen, delta):
         print name, d
@@ -45,7 +46,8 @@ def main():
 
     print np.column_stack([popt, np.sqrt(pconv.diagonal())])
 
-    pl.plot(lambda_, delta, marker="o", label="Messdaten")
+    pl.errorbar(lambda_, delta, yerr=delta_err, label="Messdaten",
+                linestyle="none", marker="+")
     pl.grid(True)
     pl.legend(loc="best")
     pl.title(u"Quecksilber-Cadmium-Lampe")
