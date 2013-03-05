@@ -23,20 +23,41 @@ def main():
     Geg = data[:,3] / 100
     G = data[:,4] / 100
 
+    B_err = 0.2e-2
+    Bild_err = 2e-2
+    P_err = 0.09e-2
+    Geg_err = 0.05e-2
+    G_err = 0.1e-2
+
     gamma = B/G
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
 
     f = 0.05
+    f_err = 0
 
     g = f * (1 + 1/gamma)
+    g_err = np.sqrt(
+        ((1+1/gamma) * f_err)**2
+        + (f/gamma**2 * gamma_err)**2
+    )
     b = f * (1 + 1/gamma)
+    b_err = np.sqrt(
+        ((1+1/gamma) * f_err)**2
+        + (f/gamma**2 * gamma_err)**2
+    )
 
     x2 = np.abs(Bild - P)
+    x2_err = np.sqrt(Bild_err**2 + P_err**2)
     x = np.abs(Geg - P)
+    x_err = np.sqrt(Geg_err**2 + P_err**2)
 
     def linear(x, a, b):
         return a * x + b
 
-    popt, pconv = op.curve_fit(linear, 1+1/gamma, x)
+    popt, pconv = op.curve_fit(linear, 1+1/gamma, x, sigma=x_err)
 
     f1 = popt[0]
     f1_err = np.sqrt(pconv.diagonal()[0])
@@ -51,7 +72,8 @@ def main():
     ploty = linear(plotx, *popt)
     pl.plot(plotx, ploty, label="Fit")
 
-    pl.plot(1 + 1/gamma, x, linestyle="none", marker="+", label="Messwerte")
+    pl.errorbar(1 + 1/gamma, x, yerr=x_err, linestyle="none", marker="+",
+                label="Messwerte")
     pl.xlabel(ur"$1 + 1/\gamma$")
     pl.title(u"Abbe 1")
     pl.ylabel("$x$")
@@ -60,7 +82,7 @@ def main():
     pl.savefig("Plot-a_x.pdf")
     pl.clf()
 
-    popt, pconv = op.curve_fit(linear, 1+gamma, x2)
+    popt, pconv = op.curve_fit(linear, 1+gamma, x2, sigma=x2_err)
 
     f2 = popt[0]
     f2_err = np.sqrt(pconv.diagonal()[0])
@@ -75,7 +97,8 @@ def main():
     ploty = linear(plotx, *popt)
     pl.plot(plotx, ploty, label="Fit")
 
-    pl.plot(1 + gamma, x2, label="Messwerte", linestyle="none", marker="+")
+    pl.errorbar(1 + gamma, x2, yerr=x2_err, label="Messwerte",
+                linestyle="none", marker="+")
     pl.xlabel(ur"$1 + \gamma$")
     pl.title(u"Abbe 2")
     pl.ylabel("$x'$")
@@ -90,13 +113,13 @@ def main():
     print "f", f, "±", f_err
 
     fg = 1/(1/0.05 - 1/0.05 + 0.05/(0.05**2))
-    
+
     print "f_gesamt", fg
 
     # Aufgabe d
 
     lx_err = 0.5
-    
+
     b = 3.10
     b_err = 0.1
 
@@ -106,10 +129,18 @@ def main():
     B_err = 0.5e-2
 
     gamma = B/G
-    print "γ", gamma
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
 
     gamma = b/f3
-    print "γ", gamma
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
 
     pl.clf()
 
@@ -154,11 +185,20 @@ def main():
     B = 0.61
     B_err = 0.005
     gamma = B/G
-    print "γ", gamma
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
+
     B = 0.66
     B_err = 0.03
     gamma = B/G
-    print "γ", gamma
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
 
 def _parse_args():
     """
