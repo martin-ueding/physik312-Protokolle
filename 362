@@ -5,8 +5,9 @@
 
 import argparse
 import matplotlib.pyplot as pl
-import numpy as np
 import mpl_toolkits.mplot3d.axes3d as p3
+import numpy as np
+import scipy.optimize as op
 
 __docformat__ = "restructuredtext en"
 
@@ -32,19 +33,63 @@ def main():
     x2 = np.abs(Bild - P)
     x = np.abs(Geg - P)
 
-    pl.plot(1 + 1/gamma, x, label="$x$", linestyle="none", marker="+")
+    def linear(x, a, b):
+        return a * x + b
+
+    popt, pconv = op.curve_fit(linear, 1+1/gamma, x)
+
+    f1 = popt[0]
+    f1_err = np.sqrt(pconv.diagonal()[0])
+
+    h = popt[1]
+    h_err = np.sqrt(pconv.diagonal()[1])
+
+    print "f", f1, "±", f1_err
+    print "h", h, "±", h_err
+
+    plotx = np.linspace(min(1+1/gamma), max(1+1/gamma))
+    ploty = linear(plotx, *popt)
+    pl.plot(plotx, ploty, label="Fit")
+
+    pl.plot(1 + 1/gamma, x, linestyle="none", marker="+", label="Messwerte")
     pl.xlabel(ur"$1 + 1/\gamma$")
     pl.ylabel("$x$")
+    pl.legend(loc="best")
     pl.grid(True)
     pl.savefig("Plot-a_x.pdf")
     pl.clf()
 
-    pl.plot(1 + gamma, x2, label="$x'$", linestyle="none", marker="+")
+    popt, pconv = op.curve_fit(linear, 1+gamma, x2)
+
+    f2 = popt[0]
+    f2_err = np.sqrt(pconv.diagonal()[0])
+
+    h2 = popt[1]
+    h2_err = np.sqrt(pconv.diagonal()[1])
+
+    print "f", f2, "±", f2_err
+    print "h'", h2, "±", h2_err
+
+    plotx = np.linspace(min(1+gamma), max(1+gamma))
+    ploty = linear(plotx, *popt)
+    pl.plot(plotx, ploty, label="Fit")
+
+    pl.plot(1 + gamma, x2, label="Messwerte", linestyle="none", marker="+")
     pl.xlabel(ur"$1 + \gamma$")
     pl.ylabel("$x'$")
+    pl.legend(loc="best")
     pl.grid(True)
     pl.savefig("Plot-a_xstrich.pdf")
     pl.clf()
+
+    f = np.mean([f1, f2])
+    f_err = np.sqrt(f1_err**2 + f2_err**2) / 2
+
+    print "f", f, "±", f_err
+
+    fg = 1/(1/0.05 - 1/0.05 + 0.05/(0.05**2))
+    
+    print "f_gesamt", fg
 
     # Aufgabe d
 
@@ -55,11 +100,13 @@ def main():
 
     f3 = 0.1
     G = 0.01
-    B = 3.15e-2
+    B = 3.15e-1
     B_err = 0.5e-2
 
     gamma = B/G
+    print "γ", gamma
 
+    gamma = b/f3
     print "γ", gamma
 
     pl.clf()
@@ -99,6 +146,15 @@ def main():
     pl.grid(True)
     pl.legend(loc="right")
     pl.savefig("Plot-e_2D.pdf")
+
+    B = 0.61
+    B_err = 0.005
+    gamma = B/G
+    print "γ", gamma
+    B = 0.66
+    B_err = 0.03
+    gamma = B/G
+    print "γ", gamma
 
 def _parse_args():
     """
