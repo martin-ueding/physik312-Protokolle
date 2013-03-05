@@ -179,7 +179,7 @@ def main():
     pl.ylabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
     pl.title(u"Ausleuchtung 2D")
     pl.grid(True)
-    pl.legend(loc="right")
+    pl.legend(loc="best", prop={"size": 12})
     pl.savefig("Plot-e_2D.pdf")
 
     B = 0.61
