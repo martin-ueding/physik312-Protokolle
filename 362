@@ -27,21 +27,22 @@ def main():
 
     print "γ", gamma
 
-    data = np.genfromtxt("f.csv")
-
-    x = data[:,0]
-    y = data[:,1]
-    z = data[:,2]
 
     pl.clf()
 
+    data_f = np.genfromtxt("f.csv")
+    data_g = np.genfromtxt("g.csv")
+
     fig = pl.figure()
     ax = p3.Axes3D(fig)
-    ax.scatter(x, y, z)
+    ax.scatter(data_f[:,0], data_f[:,1], data_f[:,2], marker="o", color="red")
+    ax.scatter(data_g[:,0], data_g[:,1], data_g[:,2], marker="^", color="green")
+    ax.legend(loc="best")
     ax.set_xlabel(u"$x$")
     ax.set_ylabel(u"$y$")
     ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
     pl.savefig("f.pdf")
+    pl.show()
     pl.clf()
 
 
