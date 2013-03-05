@@ -51,6 +51,15 @@ def main():
     #pl.show()
     pl.clf()
 
+    pl.plot(data_e[:,0]%5 + 5*data_e[:,1], data_e[:,2]-untergrund, marker="o", label="e", linestyle="none")
+    pl.plot(data_f[:,0]%5 + 5*data_f[:,1], data_f[:,2]-untergrund, marker="o", label="f", linestyle="none")
+    pl.plot(data_g[:,0]%5 + 5*data_g[:,1], data_g[:,2]-untergrund, marker="o", label="g", linestyle="none")
+    pl.xlabel(ur"Feldnummer")
+    pl.ylabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.savefig("Plot-e_2D.pdf")
+
 
 def _parse_args():
     """
