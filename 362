@@ -53,6 +53,7 @@ def main():
 
     pl.plot(1 + 1/gamma, x, linestyle="none", marker="+", label="Messwerte")
     pl.xlabel(ur"$1 + 1/\gamma$")
+    pl.title(u"Abbe 1")
     pl.ylabel("$x$")
     pl.legend(loc="best")
     pl.grid(True)
@@ -76,6 +77,7 @@ def main():
 
     pl.plot(1 + gamma, x2, label="Messwerte", linestyle="none", marker="+")
     pl.xlabel(ur"$1 + \gamma$")
+    pl.title(u"Abbe 2")
     pl.ylabel("$x'$")
     pl.legend(loc="best")
     pl.grid(True)
@@ -127,8 +129,9 @@ def main():
                color="blue")
     ax.set_xlabel(u"$x$")
     ax.set_ylabel(u"$y$")
+    pl.title(u"Ausleuchtung 3D")
     ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
-    pl.savefig("f.pdf")
+    pl.savefig("Plot-e_3D.pdf")
     #pl.show()
     pl.clf()
 
@@ -143,6 +146,7 @@ def main():
                 label="anderes Objektiv", linestyle="none")
     pl.xlabel(ur"Feldnummer")
     pl.ylabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
+    pl.title(u"Ausleuchtung 2D")
     pl.grid(True)
     pl.legend(loc="right")
     pl.savefig("Plot-e_2D.pdf")
