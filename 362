@@ -1,0 +1,44 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+import argparse
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+    # Aufgabe d
+    
+    b = 3.10
+    b_err = 0.1
+
+    f3 = 0.1
+    G = 0.01
+    B = 3.15e-2
+    B_err = 0.5e-2
+
+    gamma = B/G
+
+    print "γ", gamma
+
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()
