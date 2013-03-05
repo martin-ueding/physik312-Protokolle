@@ -42,7 +42,7 @@ def main():
     ax.set_ylabel(u"$y$")
     ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
     pl.savefig("f.pdf")
-    pl.show()
+    #pl.show()
     pl.clf()
 
 
