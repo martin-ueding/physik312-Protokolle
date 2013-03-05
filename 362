@@ -13,7 +13,42 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
+    # Aufgabe a
+
+    data = np.genfromtxt("a.csv")
+    B = data[:,0] / 100
+    Bild = data[:,1] / 100
+    P = data[:,2] / 100
+    Geg = data[:,3] / 100
+    G = data[:,4] / 100
+
+    gamma = B/G
+
+    f = 0.05
+
+    g = f * (1 + 1/gamma)
+    b = f * (1 + 1/gamma)
+
+    x2 = np.abs(Bild - P)
+    x = np.abs(Geg - P)
+
+    pl.plot(1 + 1/gamma, x, label="$x$", linestyle="none", marker="+")
+    pl.xlabel(ur"$1 + 1/\gamma$")
+    pl.ylabel("$x$")
+    pl.grid(True)
+    pl.savefig("Plot-a_x.pdf")
+    pl.clf()
+
+    pl.plot(1 + gamma, x2, label="$x'$", linestyle="none", marker="+")
+    pl.xlabel(ur"$1 + \gamma$")
+    pl.ylabel("$x'$")
+    pl.grid(True)
+    pl.savefig("Plot-a_xstrich.pdf")
+    pl.clf()
+
     # Aufgabe d
+
+    lx_err = 0.5
     
     b = 3.10
     b_err = 0.1
@@ -26,7 +61,6 @@ def main():
     gamma = B/G
 
     print "γ", gamma
-
 
     pl.clf()
 
@@ -51,15 +85,20 @@ def main():
     #pl.show()
     pl.clf()
 
-    pl.plot(data_e[:,0]%5 + 5*data_e[:,1], data_e[:,2]-untergrund, marker="o", label="e", linestyle="none")
-    pl.plot(data_f[:,0]%5 + 5*data_f[:,1], data_f[:,2]-untergrund, marker="o", label="f", linestyle="none")
-    pl.plot(data_g[:,0]%5 + 5*data_g[:,1], data_g[:,2]-untergrund, marker="o", label="g", linestyle="none")
+    pl.errorbar(data_e[:,0]%5 + 5*data_e[:,1], data_e[:,2]-untergrund,
+                yerr=np.ones(data_e[:,2].size)*lx_err, marker="o",
+                label="normal", linestyle="none")
+    pl.errorbar(data_f[:,0]%5 + 5*data_f[:,1], data_f[:,2]-untergrund,
+                yerr=np.ones(data_f[:,2].size)*lx_err, marker="o",
+                label="gedrehter Kondensor", linestyle="none")
+    pl.errorbar(data_g[:,0]%5 + 5*data_g[:,1], data_g[:,2]-untergrund,
+                yerr=np.ones(data_g[:,2].size)*lx_err, marker="o",
+                label="anderes Objektiv", linestyle="none")
     pl.xlabel(ur"Feldnummer")
     pl.ylabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
     pl.grid(True)
-    pl.legend(loc="best")
+    pl.legend(loc="right")
     pl.savefig("Plot-e_2D.pdf")
-
 
 def _parse_args():
     """
@@ -74,7 +113,6 @@ def _parse_args():
     #parser.add_argument("--version", action="version", version="<the version>")
 
     return parser.parse_args()
-
 
 if __name__ == "__main__":
     main()
