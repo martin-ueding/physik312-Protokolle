@@ -4,6 +4,9 @@
 # Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
 
 import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import mpl_toolkits.mplot3d.axes3d as p3
 
 __docformat__ = "restructuredtext en"
 
@@ -23,6 +26,23 @@ def main():
     gamma = B/G
 
     print "γ", gamma
+
+    data = np.genfromtxt("f.csv")
+
+    x = data[:,0]
+    y = data[:,1]
+    z = data[:,2]
+
+    pl.clf()
+
+    fig = pl.figure()
+    ax = p3.Axes3D(fig)
+    ax.scatter(x, y, z)
+    ax.set_xlabel(u"$x$")
+    ax.set_ylabel(u"$y$")
+    ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
+    pl.savefig("f.pdf")
+    pl.clf()
 
 
 def _parse_args():
