@@ -30,14 +30,20 @@ def main():
 
     pl.clf()
 
+    untergrund = 1.5
+
+    data_e = np.genfromtxt("e.csv")
     data_f = np.genfromtxt("f.csv")
     data_g = np.genfromtxt("g.csv")
 
     fig = pl.figure()
     ax = p3.Axes3D(fig)
-    ax.scatter(data_f[:,0], data_f[:,1], data_f[:,2], marker="o", color="red")
-    ax.scatter(data_g[:,0], data_g[:,1], data_g[:,2], marker="^", color="green")
-    ax.legend(loc="best")
+    ax.scatter(data_e[:,0], data_e[:,1], data_e[:,2]-untergrund, marker="x",
+               color="red")
+    ax.scatter(data_f[:,0], data_f[:,1], data_f[:,2]-untergrund, marker="o",
+               color="green")
+    ax.scatter(data_g[:,0], data_g[:,1], data_g[:,2]-untergrund, marker="^",
+               color="blue")
     ax.set_xlabel(u"$x$")
     ax.set_ylabel(u"$y$")
     ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
