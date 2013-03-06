@@ -7,6 +7,7 @@ import argparse
 import matplotlib.pyplot as pl
 import numpy as np
 import scipy.optimize as op
+from prettytable import PrettyTable
 
 __docformat__ = "restructuredtext en"
 
@@ -66,6 +67,10 @@ def main():
     pl.clf()
 
     # Lesliewürfel
+    print """
+Lesliewürfel
+============
+"""
 
     glanz = np.genfromtxt("b-glanz.csv", delimiter="\t")
     matt = np.genfromtxt("b-matt.csv", delimiter="\t")
@@ -132,14 +137,49 @@ def main():
     print "weiss ε = {:.3g} ± {:.3g}".format(weiss_popt[0], np.sqrt(weiss_pconv.diagonal()[0]))
     print "weiss offset = {:.3g} ± {:.3g}".format(weiss_popt[1], np.sqrt(weiss_pconv.diagonal()[1]))
 
-    pl.errorbar(glanz[:,0], glanz_phi, xerr=T_err, yerr=U_err,
+    pl.errorbar(glanz[:,0], glanz_phi, xerr=T_err, yerr=U_err/S,
                 label="glanz", color="gold", linestyle="none")
-    pl.errorbar(matt[:,0], matt_phi, xerr=T_err, yerr=U_err,
+    pl.errorbar(matt[:,0], matt_phi, xerr=T_err, yerr=U_err/S,
                 label="matt", color="yellow", linestyle="none")
-    pl.errorbar(schwarz[:,0], schwarz_phi, xerr=T_err, yerr=U_err,
+    pl.errorbar(schwarz[:,0], schwarz_phi, xerr=T_err, yerr=U_err/S,
                 label="schwarz", color="black", linestyle="none")
-    pl.errorbar(weiss[:,0], weiss_phi, xerr=T_err, yerr=U_err,
+    pl.errorbar(weiss[:,0], weiss_phi, xerr=T_err, yerr=U_err/S,
                 label="weiss", color="gray", linestyle="none")
+
+    header = ["T / K", "Phi/F in W/m^2", "Fehler T", "Fehler Phi/F"]
+
+    print """
+Tabellen für den Lesliewürfel-Plot
+----------------------------------
+"""
+
+    print "Glanz"
+    glanz_table = PrettyTable(header)
+    for row in zip(glanz[:,0], glanz_phi, np.ones(glanz[:,0].size)*T_err, np.ones(glanz_phi.size)*U_err/S):
+        glanz_table.add_row(row)
+    print glanz_table
+    print
+
+    print "Matt"
+    matt_table = PrettyTable(header)
+    for row in zip(matt[:,0], matt_phi, np.ones(matt[:,0].size)*T_err, np.ones(matt_phi.size)*U_err/S):
+        matt_table.add_row(row)
+    print matt_table
+    print
+
+    print "Schwarz"
+    schwarz_table = PrettyTable(header)
+    for row in zip(schwarz[:,0], schwarz_phi, np.ones(schwarz[:,0].size)*T_err, np.ones(schwarz_phi.size)*U_err/S):
+        schwarz_table.add_row(row)
+    print schwarz_table
+    print
+
+    print "Weiß"
+    weiss_table = PrettyTable(header)
+    for row in zip(weiss[:,0], weiss_phi, np.ones(weiss[:,0].size)*T_err, np.ones(weiss_phi.size)*U_err/S):
+        weiss_table.add_row(row)
+    print weiss_table
+    print
 
     epsilon = 0.1
 
@@ -162,6 +202,11 @@ def main():
     pl.savefig("Plot_b.pdf")
     pl.clf()
 
+    # Aufgabe c
+    print """
+Aufgabe c
+=========
+    """
 
     data = np.genfromtxt("c-erste.csv", delimiter="\t")
     d = data[:,0] / 100
@@ -183,6 +228,10 @@ def main():
     y = c(x, *popt)
     pl.plot(x, y, label="Fit")
 
+    print "Fitparameter"
+    print "a", popt[0], "±", np.sqrt(pconv.diagonal()[0])
+    print "b", popt[1], "±", np.sqrt(pconv.diagonal()[1])
+
     pl.errorbar(dx, dy, xerr=dx_err, yerr=dy_err, linestyle="none",
                 marker="+", label="Messdaten")
     pl.grid(True)
@@ -192,6 +241,16 @@ def main():
     pl.legend(loc="best")
     pl.savefig("Plot_c-erste.pdf")
     pl.clf()
+
+    print
+    print "Tabelle für Aufgabe c"
+    fields = ["d^-2 in m^-2", "Phi/F in W/m^2", "Fehler d^-2", "Fehler Phi/F"]
+    table = PrettyTable(fields)
+    table.align = "l"
+    for row in zip(dx, dy, dx_err, np.ones(dy.size)*dy_err):
+        table.add_row(row)
+    print table
+    print
 
     data = np.genfromtxt("c-zweite.csv", delimiter="\t")
     U1 = data[:,0]
