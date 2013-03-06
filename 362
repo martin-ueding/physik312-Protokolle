@@ -82,6 +82,9 @@ def main():
     pl.savefig("Plot-a_x.pdf")
     pl.clf()
 
+    tabelle = np.column_stack([1 + 1/gamma, x, np.ones(x.size)*x_err])
+    np.savetxt("Tabelle-a1.csv", tabelle, fmt="%f")
+
     popt, pconv = op.curve_fit(linear, 1+gamma, x2, sigma=x2_err)
 
     f2 = popt[0]
@@ -106,6 +109,9 @@ def main():
     pl.grid(True)
     pl.savefig("Plot-a_xstrich.pdf")
     pl.clf()
+
+    tabelle = np.column_stack([1 + gamma, x2, np.ones(x.size)*x2_err])
+    np.savetxt("Tabelle-a2.csv", tabelle, fmt="%f")
 
     f = np.mean([f1, f2])
     f_err = np.sqrt(f1_err**2 + f2_err**2) / 2
