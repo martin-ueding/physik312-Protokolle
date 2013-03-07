@@ -130,7 +130,9 @@ Aufgabe b
 
     print """
 Aufgabe c und d
-===============
+---------------
+
+Astronomisches Fernrohr
 """
 
     data = np.genfromtxt("c.csv")
@@ -156,14 +158,55 @@ Aufgabe c und d
 
     print """
 Aufgabe e
-=========
+---------
+
+Terrestisches Fernrohr
 """
 
     l1 = 36.5e-2
     l2 = 42e-2
     l_err = 0.5e-2
 
+    differenz = l2-l1
+    differenz_err = np.sqrt(2) * l_err
 
+    print "Längendifferenz: {:.3g} ± {:.2g} m".format(differenz, differenz_err)
+
+    B = 12e-2
+    B_err = 2e-2
+    G = 2e-2
+
+    f1 = 300e-3
+    f2 = 50e-3
+    f3 = 12.7-3
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    print
+    print "V_f = {:.3g}".format(V_f)
+    print "V_a = {:.3g} ± {:.2g}".format(V_a, V_a_err)
+
+    print """
+Aufgabe g
+---------
+
+Zwischenbildebene im terrestischen Fernrohr
+"""
+
+    f1 = 300e-3
+    f2 = 50.2e-3
+
+    B = 10e-2
+    G = 0.6e-2
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    print "V_f = {:.3g}".format(V_f)
+    print "V_a = {:.3g} ± {:.2g}".format(V_a, V_a_err)
 
 def _parse_args():
     """
