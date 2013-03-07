@@ -13,6 +13,11 @@ __docformat__ = "restructuredtext en"
 def main():
     options = _parse_args()
 
+    print """#######################
+physik312 – Versuch 364
+#######################
+"""
+
     print """
 Aufgabe a
 =========
