@@ -154,6 +154,15 @@ Aufgabe c und d
 
     print t
 
+    print """
+Aufgabe e
+=========
+"""
+
+    l1 = 36.5e-2
+    l2 = 42e-2
+    l_err = 0.5e-2
+
 
 
 def _parse_args():
