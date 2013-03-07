@@ -129,8 +129,8 @@ Aufgabe b
     print "f = {:.3g} ± {:.3g} m".format(f, f_err)
 
     print """
-Aufgabe c
-=========
+Aufgabe c und d
+===============
 """
 
     data = np.genfromtxt("c.csv")
@@ -145,10 +145,10 @@ Aufgabe c
     V_a = B/G
     V_a_err = 1/G * B_err
 
-    t = PrettyTable(["f_1 in m", "f_2 in m", "V_f", "V_a", "Fehler V_a"])
-    t.align = "r"
+    t = PrettyTable(["f_1 in mm", "f_2 in mm", "V_f", "V_a", "Fehler V_a"])
+    t.align = "c"
 
-    for row in zip(f1, f2, V_f, V_a, V_a_err):
+    for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
         row = ["{:.3g}".format(x) for x in row]
         t.add_row(row)
 
