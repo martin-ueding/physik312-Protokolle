@@ -27,12 +27,64 @@ Aufgabe a
     B = 9.0e-3
     G_err = 0.005e-3
 
-    gamma = B/G
-    gamma_err = B/G**2 * G_err
+    gamma_obj1 = B/G
+    gamma_obj1_err = B/G**2 * G_err
 
     print
-    print "γ = {:.3g} ± {:.3g}".format(gamma, gamma_err)
+    print "Objektivmaßstab bei 10x und 10x:"
+    print "γ_obj1 = {:.3g} ± {:.3g}".format(gamma_obj1, gamma_obj1_err)
 
+    B = 9.3e-3
+    G = 0.5e-3
+
+    gamma_obj2 = B/G
+    gamma_obj2_err = B/G**2 * G_err
+
+    print
+    print "Objektivmaßstab bei 20x und 10x:"
+    print "γ_obj2 = {:.3g} ± {:.3g}".format(gamma_obj2, gamma_obj2_err)
+
+    B = 10e-2
+    G = 0.72e-3
+    G_err = 0.01e-3
+
+    gamma_M1 = B/G
+    gamma_M1_err = B/G**2 * G_err
+
+    print
+    print "Gesamtmaßstab bei 10x und 10x:"
+    print "γ_M1 = {:.3g} ± {:.3g}".format(gamma_M1, gamma_M1_err)
+
+    B = 4e-2
+    G = 0.37e-3
+    G_err = 0.01e-3
+
+    gamma_M2 = B/G
+    gamma_M2_err = B/G**2 * G_err
+
+    print
+    print "Gesamtmaßstab bei 20x und 5x:"
+    print "γ_M2 = {:.3g} ± {:.3g}".format(gamma_M2, gamma_M2_err)
+
+    b = 31.7e-2
+    b_err = 0.25e-2
+    s0 = 25e-2
+
+    gamma_M = np.mean([gamma_M1, gamma_M2]) 
+    gamma_M_err = np.sqrt(gamma_M1_err**2 + gamma_M2_err**2) / 2
+    gamma_obj = np.mean([gamma_obj1, gamma_obj2])
+    gamma_obj_err = np.sqrt(gamma_obj1_err**2 + gamma_obj2_err**2) / 2
+
+    V_oku = gamma_M * s0 / gamma_obj / b
+    V_oku_err = np.sqrt(
+        (s0 / gamma_obj / b * gamma_M_err)**2
+        +(gamma_M * s0 / gamma_obj**2 / b * gamma_obj_err)**2
+        +(gamma_M * s0 / gamma_obj / b**2 * b_err)**2
+    )
+
+    print
+    print "Vergrößerung des Okulars:"
+    print "V_oku = {:.3g} ± {:.3g}".format(V_oku, V_oku_err)
 
 
 def _parse_args():
