@@ -1,0 +1,49 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+    print """
+Aufgabe a
+=========
+""".strip()
+
+    G = 0.86e-3
+    B = 9.0e-3
+    G_err = 0.005e-3
+
+    gamma = B/G
+    gamma_err = B/G**2 * G_err
+
+    print
+    print "γ = {:.3g} ± {:.3g}".format(gamma, gamma_err)
+
+
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()
