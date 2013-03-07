@@ -208,6 +208,13 @@ Zwischenbildebene im terrestischen Fernrohr
     print "V_f = {:.3g}".format(V_f)
     print "V_a = {:.3g} ± {:.2g}".format(V_a, V_a_err)
 
+    print """
+Aufgabe f
+---------
+
+Galileisches Fernrohr
+"""
+
 def _parse_args():
     """
     Parses the command line arguments.
