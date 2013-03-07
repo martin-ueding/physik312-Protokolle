@@ -241,8 +241,8 @@ Aufgabe h: Auflösungsvermögen
     E = 5.20
     E_err = 10e-2
 
-    alpha = G/E
-    alpha_err = np.sqrt(
+    alpha = np.pi * G / 36 / E
+    alpha_err = np.pi / 36 * np.sqrt(
         (1/E * G_err)**2
         + (G/E**2 * E_err)**2
     )
@@ -268,6 +268,15 @@ Aufgabe h: Auflösungsvermögen
     pl.legend(loc="best")
     pl.savefig("Plot-h.pdf")
     pl.clf()
+
+    t = PrettyTable(["D in mm", "alpha in mrad", "alpha in grad"])
+    for d, a in zip(D, alpha):
+        row = ["{:.3g}".format(x) for x in [d, a*1000, np.degrees(a)]]
+        t.add_row(row)
+    t.align = "l"
+
+    print
+    print t
 
 
 def _parse_args():
