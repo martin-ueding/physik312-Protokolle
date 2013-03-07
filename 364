@@ -20,7 +20,7 @@ physik312 – Versuch 364
 
     print """
 Aufgabe a
-=========
+---------
 """.strip()
 
     G = 0.86e-3
