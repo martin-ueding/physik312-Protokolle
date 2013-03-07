@@ -148,7 +148,7 @@ Aufgabe c und d: Astronomisches Fernrohr
     V_a = B/G
     V_a_err = 1/G * B_err
 
-    t = PrettyTable(["f_1 in mm", "f_2 in mm", "V_f", "V_a", "Fehler V_a"])
+    t = PrettyTable([u"f₁ in mm", u"f₂ in mm", "V_f", "V_a", "Fehler V_a"])
     t.align = "c"
 
     for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
@@ -222,7 +222,7 @@ Aufgabe f: Galileisches Fernrohr
     V_a = np.abs(B/G)
     V_a_err = np.abs(1/G * B_err)
 
-    t = PrettyTable(["f_1 in mm", "f_2 in mm", "V_f", "V_a", "Fehler V_a"])
+    t = PrettyTable([u"f₁ in mm", u"f₂ in mm", "V_f", "V_a", "Fehler V_a"])
     t.align = "c"
 
     for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
@@ -272,15 +272,26 @@ Aufgabe h: Auflösungsvermögen
     pl.savefig("Plot-h.pdf")
     pl.clf()
 
-    t = PrettyTable(["D in mm", "alpha in mrad", "alpha in grad"])
-    for d, a in zip(D, alpha):
-        row = ["{:.3g}".format(x) for x in [d, a*1000, np.degrees(a)]]
+    t = PrettyTable(["D in mm", u"α in mrad", u"Fehler α in mrad", u"α in °"])
+    for d, a, a_err in zip(D, alpha, alpha_err):
+        row = ["{:.3g}".format(x) for x in [d, a*1000, a_err*1000]] + [radian_to_dms(a)]
         t.add_row(row)
     t.align = "l"
 
     print
     print t
 
+def radian_to_dms(angle):
+    """
+    Converts an angle that is given in radians to degrees, minutes and seconds.
+    """
+    degree = np.degrees(angle)
+
+    d = int(degree)
+    m = int((degree % 1) * 60)
+    s = ((degree * 60) % 1) * 60
+
+    return u"{:3d}° {:2d}' {:4.1f}\"".format(d, m, s)
 
 def _parse_args():
     """
