@@ -3,6 +3,7 @@
 
 # Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
 
+from prettytable import PrettyTable
 import argparse
 import matplotlib.pyplot as pl
 import numpy as np
@@ -126,6 +127,34 @@ Aufgabe b
     print
     print "Brennweite nach Abbe:"
     print "f = {:.3g} ± {:.3g} m".format(f, f_err)
+
+    print """
+Aufgabe c
+=========
+"""
+
+    data = np.genfromtxt("c.csv")
+
+    f1 = data[:,0]
+    f2 = data[:,1]
+    B = data[:,2]
+    G = data[:,3]
+    B_err = data[:,4]
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    t = PrettyTable(["f_1 in m", "f_2 in m", "V_f", "V_a", "Fehler V_a"])
+    t.align = "r"
+
+    for row in zip(f1, f2, V_f, V_a, V_a_err):
+        row = ["{:.3g}".format(x) for x in row]
+        t.add_row(row)
+
+    print t
+
+
 
 def _parse_args():
     """
