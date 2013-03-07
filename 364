@@ -129,10 +129,8 @@ Aufgabe b
     print "f = {:.3g} ± {:.3g} m".format(f, f_err)
 
     print """
-Aufgabe c und d
----------------
-
-Astronomisches Fernrohr
+Aufgabe c und d: Astronomisches Fernrohr
+----------------------------------------
 """
 
     data = np.genfromtxt("c.csv")
@@ -157,10 +155,8 @@ Astronomisches Fernrohr
     print t
 
     print """
-Aufgabe e
----------
-
-Terrestisches Fernrohr
+Aufgabe e: Terrestisches Fernrohr
+---------------------------------
 """
 
     l1 = 36.5e-2
@@ -189,10 +185,8 @@ Terrestisches Fernrohr
     print "V_a = {:.3g} ± {:.2g}".format(V_a, V_a_err)
 
     print """
-Aufgabe g
----------
-
-Zwischenbildebene im terrestischen Fernrohr
+Aufgabe g: Zwischenbildebene im terrestischen Fernrohr
+------------------------------------------------------
 """
 
     f1 = 300e-3
@@ -209,10 +203,8 @@ Zwischenbildebene im terrestischen Fernrohr
     print "V_a = {:.3g} ± {:.2g}".format(V_a, V_a_err)
 
     print """
-Aufgabe f
----------
-
-Galileisches Fernrohr
+Aufgabe f: Galileisches Fernrohr
+--------------------------------
 """
 
     data = np.genfromtxt("f.csv")
@@ -235,6 +227,48 @@ Galileisches Fernrohr
         t.add_row(row)
 
     print t
+
+    print """
+Aufgabe h: Auflösungsvermögen
+------------------------------
+"""
+
+    data = np.genfromtxt("h.csv")
+    D = data[:,0]/1000
+    G = (data[:,2]-data[:,1])/100
+    G_err = 1e-3
+
+    E = 5.20
+    E_err = 10e-2
+
+    alpha = G/E
+    alpha_err = np.sqrt(
+        (1/E * G_err)**2
+        + (G/E**2 * E_err)**2
+    )
+
+    def fit(D, lambda_):
+        return 1.22 * lambda_ / D
+
+    popt, pconv = op.curve_fit(fit, D, alpha, sigma=alpha_err)
+    x = np.linspace(min(D), max(D))
+    y = fit(x, *popt)
+    pl.plot(1/(x*1000), y*1000, label="Fit", color="black")
+
+    lambda_ = popt[0]
+    lambda_err = np.sqrt(pconv.diagonal()[0])
+
+    print "λ = {:.4g} ± {:.2g} m".format(lambda_, lambda_err)
+
+    pl.errorbar(1/(D*1000), alpha*1000, yerr=alpha_err*1000, label="Messdaten", linestyle="none", marker="+", color="black")
+    pl.title(u"Auflösungsvermögen des Fernrohrs")
+    pl.xlabel(ur"inverser Abstand $D^{-1} / \mathrm{mm^{-1}}$")
+    pl.ylabel(ur"Sehwinkel $\alpha/\mathrm{mrad}$")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.savefig("Plot-h.pdf")
+    pl.clf()
+
 
 def _parse_args():
     """
