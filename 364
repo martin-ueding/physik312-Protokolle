@@ -75,17 +75,57 @@ Aufgabe a
     gamma_obj = np.mean([gamma_obj1, gamma_obj2])
     gamma_obj_err = np.sqrt(gamma_obj1_err**2 + gamma_obj2_err**2) / 2
 
-    V_oku = gamma_M * s0 / gamma_obj / b
-    V_oku_err = np.sqrt(
-        (s0 / gamma_obj / b * gamma_M_err)**2
-        +(gamma_M * s0 / gamma_obj**2 / b * gamma_obj_err)**2
-        +(gamma_M * s0 / gamma_obj / b**2 * b_err)**2
+    print
+    print "Gemittelte Werte:"
+    print "γ_M = {:.3g} ± {:.3g}".format(gamma_M, gamma_M_err)
+    print "γ_obj = {:.3g} ± {:.3g}".format(gamma_obj, gamma_obj_err)
+
+    V_oku1 = gamma_M1 * s0 / gamma_obj1 / b
+    V_oku1_err = np.sqrt(
+        (s0 / gamma_obj1 / b * gamma_M1_err)**2
+        +(gamma_M1 * s0 / gamma_obj1**2 / b * gamma_obj1_err)**2
+        +(gamma_M1 * s0 / gamma_obj1 / b**2 * b_err)**2
+    )
+
+    V_oku2 = gamma_M * s0 / gamma_obj2 / b
+    V_oku2_err = np.sqrt(
+        (s0 / gamma_obj / b * gamma_M2_err)**2
+        +(gamma_M2 * s0 / gamma_obj2**2 / b * gamma_obj2_err)**2
+        +(gamma_M2 * s0 / gamma_obj2 / b**2 * b_err)**2
     )
 
     print
     print "Vergrößerung des Okulars:"
-    print "V_oku = {:.3g} ± {:.3g}".format(V_oku, V_oku_err)
+    print "V_oku1 = {:.3g} ± {:.3g}".format(V_oku1, V_oku1_err)
+    print "V_oku2 = {:.3g} ± {:.3g}".format(V_oku2, V_oku2_err)
 
+    print """
+Aufgabe b
+---------
+"""
+
+    T = 6e-2
+    T_err = 0.1e-2
+
+    B = 4e-2
+    G = 0.235e-3
+
+    gamma_2 = B/G
+    gamma_2_err = B/G**2 * G_err
+
+    print "Maßstab mit Tubusverlängerung:"
+    print "γ_2 = {:.3g} ± {:.3g}".format(gamma_2, gamma_2_err)
+
+    f = T / (gamma_2 - gamma_M2)
+    f_err = np.sqrt(
+        (1/(gamma_2 - gamma_M2) * T_err)**2
+        + (T / (gamma_2 - gamma_M2)**2 * gamma_2_err)**2
+        + (T / (gamma_2 - gamma_M2)**2 * gamma_M2_err)**2
+    )
+
+    print
+    print "Brennweite nach Abbe:"
+    print "f = {:.3g} ± {:.3g} m".format(f, f_err)
 
 def _parse_args():
     """
