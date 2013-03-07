@@ -215,6 +215,27 @@ Aufgabe f
 Galileisches Fernrohr
 """
 
+    data = np.genfromtxt("f.csv")
+
+    f1 = data[:,0]
+    f2 = data[:,1]
+    B = data[:,2]
+    G = data[:,3]
+    B_err = data[:,4]
+
+    V_f = np.abs(f1/f2)
+    V_a = np.abs(B/G)
+    V_a_err = np.abs(1/G * B_err)
+
+    t = PrettyTable(["f_1 in mm", "f_2 in mm", "V_f", "V_a", "Fehler V_a"])
+    t.align = "c"
+
+    for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
+        row = ["{:.3g}".format(x) for x in row]
+        t.add_row(row)
+
+    print t
+
 def _parse_args():
     """
     Parses the command line arguments.
