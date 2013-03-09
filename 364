@@ -275,7 +275,7 @@ Aufgabe h: Auflösungsvermögen
 
     t = PrettyTable(["D in mm", u"α in mrad", u"Fehler α in mrad", u"α in °"])
     for d, a, a_err in zip(D, alpha, alpha_err):
-        row = ["{:.3g}".format(x) for x in [d, a*1000, a_err*1000]] + [radian_to_dms(a)]
+        row = ["{:.3g}".format(x) for x in [d*1000, a*1000, a_err*1000]] + [radian_to_dms(a)]
         t.add_row(row)
     t.align = "l"
 
