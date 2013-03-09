@@ -282,6 +282,26 @@ Aufgabe h: Auflösungsvermögen
     print
     print t
 
+    print """
+Aufgabe i: Diskussion
+---------------------
+"""
+
+    y = 1e-6
+    lambda_ = 500e-9
+    n = 1.0
+
+    na = 0.61 * lambda_ / y
+
+    print "Numerische Apertur des Mikroskops:", na
+
+    u_auge = 2.54e-2/300 / 0.25
+    print "Winkel des Auges (300 DPI):", up.format(u_auge, unit="rad")
+
+    u_auge = 1e-3 / 2
+    print "Winkel des Auges (1mm Maß):", up.format(u_auge, unit="rad")
+
+
 def radian_to_dms(angle):
     """
     Converts an angle that is given in radians to degrees, minutes and seconds.
