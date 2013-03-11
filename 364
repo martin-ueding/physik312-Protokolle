@@ -84,7 +84,7 @@ Aufgabe a
 
     V_oku2 = gamma_M2 * s0 / gamma_obj2 / b
     V_oku2_err = np.sqrt(
-        (s0 / gamma_obj / b * gamma_M2_err)**2
+        (s0 / gamma_obj2 / b * gamma_M2_err)**2
         +(gamma_M2 * s0 / gamma_obj2**2 / b * gamma_obj2_err)**2
         +(gamma_M2 * s0 / gamma_obj2 / b**2 * b_err)**2
     )
