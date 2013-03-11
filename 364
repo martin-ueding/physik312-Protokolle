@@ -75,16 +75,6 @@ Aufgabe a
     b_err = 0.25e-2
     s0 = 25e-2
 
-    gamma_M = np.mean([gamma_M1, gamma_M2]) 
-    gamma_M_err = np.sqrt(gamma_M1_err**2 + gamma_M2_err**2) / 2
-    gamma_obj = np.mean([gamma_obj1, gamma_obj2])
-    gamma_obj_err = np.sqrt(gamma_obj1_err**2 + gamma_obj2_err**2) / 2
-
-    print
-    print "Gemittelte Werte:"
-    print "γ_M = {}".format(up.format(gamma_M, gamma_M_err))
-    print "γ_obj = {}".format(up.format(gamma_obj, gamma_obj_err))
-
     V_oku1 = gamma_M1 * s0 / gamma_obj1 / b
     V_oku1_err = np.sqrt(
         (s0 / gamma_obj1 / b * gamma_M1_err)**2
@@ -92,7 +82,7 @@ Aufgabe a
         +(gamma_M1 * s0 / gamma_obj1 / b**2 * b_err)**2
     )
 
-    V_oku2 = gamma_M * s0 / gamma_obj2 / b
+    V_oku2 = gamma_M2 * s0 / gamma_obj2 / b
     V_oku2_err = np.sqrt(
         (s0 / gamma_obj / b * gamma_M2_err)**2
         +(gamma_M2 * s0 / gamma_obj2**2 / b * gamma_obj2_err)**2
