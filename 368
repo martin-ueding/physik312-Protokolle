@@ -30,12 +30,6 @@ def main():
     x = (data[:,1] - data[0, 1]) / 1000
     x_err = data[:,2] / 1000
 
-    alpha = np.arctan(x / a_f)
-    alpha_err = 1.0 / (a_f * (1 + x**2/a_f**2)) * x_err
-
-    print "m, alpha, alpha_err"
-    print np.column_stack([m, x, x_err])
-
     def linear(x, a):
         return x * a
 
@@ -44,11 +38,15 @@ def main():
     a = popt[0]
     a_err = np.sqrt(pconv.diagonal()[0])
 
-    print "a = {:.3g} ± {:.3g}".format(a, a_err)
+    print "a = {:.4g} ± {:.3g}".format(a, a_err)
 
     gelb = a_D * a / a_f
+    gelb_err = np.sqrt(
+        (a / a_f * a_D_err)**2
+        + (a_D / a_f * a_err)**2
+    )
 
-    print "λ_gelb = {:.3g}".format(gelb)
+    print "λ_gelb = {:.4g} ± {:.3g}".format(gelb, gelb_err)
 
     plot_x = np.linspace(0, max(m)+1, 100)
     plot_y = linear(plot_x, *popt)
@@ -76,18 +74,23 @@ def main():
     c_g_err = 0.5e-2
 
     d = c_B * c_g / c_b
+    d_err = np.sqrt(
+        (c_g / c_b * c_B_err)**2
+        + (c_B / c_b * c_g_err)**2
+        + (c_B * c_g / c_b**2 * c_b_err)**2
+    )
 
-    print "d = {:.3g}".format(d)
+    print "d = {:.4g} ± {:.3g}".format(d, d_err)
 
-    print "dD = {:.3g}".format(
+    print "dD = {:.4g}".format(
         d * a_D
     )
 
-    print "1/8 λ L = {:.3g}".format(
+    print "1/8 λ L = {:.4g}".format(
         1/8.0 * gelb * a_L
     )
 
-    print "dD - 1/8 λ L = {:.3g}".format(
+    print "dD - 1/8 λ L = {:.4g}".format(
         d * a_D - 1/8.0 * gelb * a_L
     )
 
@@ -114,7 +117,7 @@ def main():
     print "m, phi, g"
     print np.column_stack([m, phi, g])
 
-    print "g = {:.3g} ± {:.3g} m".format(g_val, g_err)
+    print "g = {:.4g} ± {:.3g} m".format(g_val, g_err)
 
     pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+",
                 color="black")
@@ -138,7 +141,7 @@ def main():
     blau_val = np.mean(blau)
     blau_err = np.std(blau) / len(blau)
 
-    print "λ_blau = {:.3g} ± {:.3g} m".format(blau_val, blau_err)
+    print "λ_blau = {:.6g} ± {:.3g} m".format(blau_val, blau_err)
 
 ###############################################################################
 #                                  Aufgabe f                                  #
