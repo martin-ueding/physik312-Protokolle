@@ -8,6 +8,8 @@ import matplotlib.pyplot as pl
 import numpy as np
 import scipy.optimize as op
 
+import wavelength
+
 __docformat__ = "restructuredtext en"
 
 def main():
@@ -95,6 +97,9 @@ def main():
 
     print "R", R
 
+    print "λ, A, λ/A"
+    print np.column_stack([lambda_*10**9, A, lambda_ / A*10**9])
+
 ###############################################################################
 #                                  Aufgabe d                                  #
 ###############################################################################
@@ -108,6 +113,7 @@ def main():
     delta = (alpha[:,1] - alpha[:,0])/2
     delta_err = np.ones(delta.size) * alpha_err
 
+    print u"δ"
     print delta
 
     n = np.sin((delta + gamma)/2) / np.sin(gamma/2)
@@ -116,6 +122,7 @@ def main():
         + ((0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) - 0.5 / np.tan(gamma/2) / np.sin(gamma/2) * np.sin((delta+gamma)/2)) * gamma_err)**2
     )
 
+    print u"n, Δn"
     print np.column_stack([n, n_err])
 
     lambda_ = np.sqrt(k1/(n - k0))
@@ -125,7 +132,21 @@ def main():
         + (1.0 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)) * k1_err)**2
     )
 
+    print u"λ, Δλ"
     print np.column_stack([lambda_, lambda_err]) * 10**9
+
+    with open("color.html", "w") as f:
+        for r, g, b, l in [wavelength.wav2RGB(l * 10**9) + [int((l - min(lambda_)) *10**9)] for l in lambda_]:
+            f.write("""
+                    <div style="
+                    background-color: rgb({}, {}, {});
+                    width: 5px;
+                    height: 100px;
+                    position: absolute;
+                    top: 0px;
+                    left: {}px;">
+                    </div>
+                    """.format(r, g, b, l))
 
 def _parse_args():
     """
