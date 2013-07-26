@@ -7,5 +7,5 @@ physik312
 This is a program for the physics312 module to work with the measurements taken
 during the optics laboratory course.
 
-See http://uni-bonn.de/~s6mauedi/physik312/index.html for more information
-(German).
+See http://martin-ueding.de/university/physik312/index.html for more
+information (German).
