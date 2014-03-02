@@ -1,0 +1,224 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+import argparse
+import matplotlib.pyplot as pl
+import mpl_toolkits.mplot3d.axes3d as p3
+import numpy as np
+import scipy.optimize as op
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+    # Aufgabe a
+
+    data = np.genfromtxt("a.csv")
+    B = data[:,0] / 100
+    Bild = data[:,1] / 100
+    P = data[:,2] / 100
+    Geg = data[:,3] / 100
+    G = data[:,4] / 100
+
+    B_err = 0.2e-2
+    Bild_err = 2e-2
+    P_err = 0.09e-2
+    Geg_err = 0.05e-2
+    G_err = 0.1e-2
+
+    gamma = B/G
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+
+    f = 0.05
+    f_err = 0
+
+    g = f * (1 + 1/gamma)
+    g_err = np.sqrt(
+        ((1+1/gamma) * f_err)**2
+        + (f/gamma**2 * gamma_err)**2
+    )
+    b = f * (1 + 1/gamma)
+    b_err = np.sqrt(
+        ((1+1/gamma) * f_err)**2
+        + (f/gamma**2 * gamma_err)**2
+    )
+
+    x2 = np.abs(Bild - P)
+    x2_err = np.sqrt(Bild_err**2 + P_err**2)
+    x = np.abs(Geg - P)
+    x_err = np.sqrt(Geg_err**2 + P_err**2)
+
+    def linear(x, a, b):
+        return a * x + b
+
+    popt, pconv = op.curve_fit(linear, 1+1/gamma, x, sigma=x_err)
+
+    f1 = popt[0]
+    f1_err = np.sqrt(pconv.diagonal()[0])
+
+    h = popt[1]
+    h_err = np.sqrt(pconv.diagonal()[1])
+
+    print "f", f1, "±", f1_err
+    print "h", h, "±", h_err
+
+    plotx = np.linspace(min(1+1/gamma), max(1+1/gamma))
+    ploty = linear(plotx, *popt)
+    pl.plot(plotx, ploty, label="Fit")
+
+    pl.errorbar(1 + 1/gamma, x, yerr=x_err, linestyle="none", marker="+",
+                label="Messwerte")
+    pl.xlabel(ur"$1 + 1/\gamma$")
+    pl.title(u"Abbe 1")
+    pl.ylabel("$x$")
+    pl.legend(loc="best")
+    pl.grid(True)
+    pl.savefig("Plot-a_x.pdf")
+    pl.clf()
+
+    tabelle = np.column_stack([1 + 1/gamma, x, np.ones(x.size)*x_err])
+    np.savetxt("Tabelle-a1.csv", tabelle, fmt="%f")
+
+    popt, pconv = op.curve_fit(linear, 1+gamma, x2, sigma=x2_err)
+
+    f2 = popt[0]
+    f2_err = np.sqrt(pconv.diagonal()[0])
+
+    h2 = popt[1]
+    h2_err = np.sqrt(pconv.diagonal()[1])
+
+    print "f", f2, "±", f2_err
+    print "h'", h2, "±", h2_err
+
+    plotx = np.linspace(min(1+gamma), max(1+gamma))
+    ploty = linear(plotx, *popt)
+    pl.plot(plotx, ploty, label="Fit")
+
+    pl.errorbar(1 + gamma, x2, yerr=x2_err, label="Messwerte",
+                linestyle="none", marker="+")
+    pl.xlabel(ur"$1 + \gamma$")
+    pl.title(u"Abbe 2")
+    pl.ylabel("$x'$")
+    pl.legend(loc="best")
+    pl.grid(True)
+    pl.savefig("Plot-a_xstrich.pdf")
+    pl.clf()
+
+    tabelle = np.column_stack([1 + gamma, x2, np.ones(x.size)*x2_err])
+    np.savetxt("Tabelle-a2.csv", tabelle, fmt="%f")
+
+    f = np.mean([f1, f2])
+    f_err = np.sqrt(f1_err**2 + f2_err**2) / 2
+
+    print "f", f, "±", f_err
+
+    fg = 1/(1/0.05 - 1/0.05 + 0.05/(0.05**2))
+
+    print "f_gesamt", fg
+
+    # Aufgabe d
+
+    lx_err = 0.5
+
+    b = 3.10
+    b_err = 0.1
+
+    f3 = 0.1
+    G = 0.01
+    B = 3.15e-1
+    B_err = 0.5e-2
+
+    gamma = B/G
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
+
+    gamma = b/f3
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
+
+    pl.clf()
+
+    untergrund = 1.5
+
+    data_e = np.genfromtxt("e.csv")
+    data_f = np.genfromtxt("f.csv")
+    data_g = np.genfromtxt("g.csv")
+
+    fig = pl.figure()
+    ax = p3.Axes3D(fig)
+    ax.scatter(data_e[:,0], data_e[:,1], data_e[:,2]-untergrund, marker="x",
+               color="red")
+    ax.scatter(data_f[:,0], data_f[:,1], data_f[:,2]-untergrund, marker="o",
+               color="green")
+    ax.scatter(data_g[:,0], data_g[:,1], data_g[:,2]-untergrund, marker="^",
+               color="blue")
+    ax.set_xlabel(u"$x$")
+    ax.set_ylabel(u"$y$")
+    pl.title(u"Ausleuchtung 3D")
+    ax.set_zlabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
+    pl.savefig("Plot-e_3D.pdf")
+    #pl.show()
+    pl.clf()
+
+    pl.errorbar(data_e[:,0]%5 + 5*data_e[:,1], data_e[:,2]-untergrund,
+                yerr=np.ones(data_e[:,2].size)*lx_err, marker="o",
+                label="normal", linestyle="none")
+    pl.errorbar(data_f[:,0]%5 + 5*data_f[:,1], data_f[:,2]-untergrund,
+                yerr=np.ones(data_f[:,2].size)*lx_err, marker="o",
+                label="gedrehter Kondensor", linestyle="none")
+    pl.errorbar(data_g[:,0]%5 + 5*data_g[:,1], data_g[:,2]-untergrund,
+                yerr=np.ones(data_g[:,2].size)*lx_err, marker="o",
+                label="anderes Objektiv", linestyle="none")
+    pl.xlabel(ur"Feldnummer")
+    pl.ylabel(u"Beleuchtungsstärke $E/\mathrm{lx}$")
+    pl.title(u"Ausleuchtung 2D")
+    pl.grid(True)
+    pl.legend(loc="best", prop={"size": 12})
+    pl.savefig("Plot-e_2D.pdf")
+
+    B = 0.61
+    B_err = 0.005
+    gamma = B/G
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
+
+    B = 0.66
+    B_err = 0.03
+    gamma = B/G
+    gamma_err = np.sqrt(
+        (1/G * B_err)**2
+        + (B/G**2 * G_err)**2
+    )
+    print "γ", gamma, "±", gamma_err
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    main()
