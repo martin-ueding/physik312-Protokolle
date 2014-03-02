@@ -1,0 +1,219 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+###############################################################################
+#                                  Aufgabe b                                  #
+###############################################################################
+
+    a_f = 0.5
+    a_D = 0.1e-3
+    a_D_err = 0.001e-3
+
+    a_L = 0.20
+    a_L_err = 0.05
+
+    data = np.genfromtxt("b.csv", delimiter="\t")
+
+    m = data[:,0]
+    x = (data[:,1] - data[0, 1]) / 1000
+    x_err = data[:,2] / 1000
+
+    def linear(x, a):
+        return x * a
+
+    popt, pconv = op.curve_fit(linear, m, x, sigma=x_err)
+
+    a = popt[0]
+    a_err = np.sqrt(pconv.diagonal()[0])
+
+    print "a = {:.4g} ± {:.3g}".format(a, a_err)
+
+    gelb = a_D * a / a_f
+    gelb_err = np.sqrt(
+        (a / a_f * a_D_err)**2
+        + (a_D / a_f * a_err)**2
+    )
+
+    print "λ_gelb = {:.4g} ± {:.3g}".format(gelb, gelb_err)
+
+    plot_x = np.linspace(0, max(m)+1, 100)
+    plot_y = linear(plot_x, *popt)
+
+    pl.errorbar(m, x, yerr=x_err, linestyle="none", marker="+", color="black",
+                label="Messwerte")
+    pl.plot(plot_x, plot_y, label="Fit", color="black")
+    pl.title(u"Position der Minima des Einzelspalts")
+    pl.xlabel(ur"Ordnung $m$")
+    pl.ylabel(ur"$x_m / \mathrm{m}$")
+    pl.grid(True)
+    pl.savefig("b.pdf")
+    pl.clf()
+
+###############################################################################
+#                                  Aufgabe c                                  #
+###############################################################################
+
+    c_B = 0.012
+    c_b = 1.00
+    c_B_err = 0.1e-2
+    c_b_err = 0.5e-2
+    c_f = 0.175
+    c_g = 0.215
+    c_g_err = 0.5e-2
+
+    d = c_B * c_g / c_b
+    d_err = np.sqrt(
+        (c_g / c_b * c_B_err)**2
+        + (c_B / c_b * c_g_err)**2
+        + (c_B * c_g / c_b**2 * c_b_err)**2
+    )
+
+    print "d = {:.4g} ± {:.3g}".format(d, d_err)
+
+    print "dD = {:.4g}".format(
+        d * a_D
+    )
+
+    print "1/8 λ L = {:.4g}".format(
+        1/8.0 * gelb * a_L
+    )
+
+    print "dD - 1/8 λ L = {:.4g}".format(
+        d * a_D - 1/8.0 * gelb * a_L
+    )
+
+###############################################################################
+#                                  Aufgabe d                                  #
+###############################################################################
+
+    err = 0.3e-3
+
+    data = np.genfromtxt("d.csv", delimiter="\t")
+
+    m = data[:,0]
+    phi = (data[:,1] - data[:,2])/2 / 100
+
+    phi_err = 0.3e-3
+
+    gruen = 546.07e-9
+
+    g = m * gruen / (2 * np.sin(phi/2))
+
+    g_val = np.mean(g)
+    g_err = np.std(g) / len(g)
+
+    print "m, phi, g"
+    print np.column_stack([m, phi, g])
+
+    print "g = {:.4g} ± {:.3g} m".format(g_val, g_err)
+
+    pl.errorbar(m, phi, yerr=phi_err, linestyle="none", marker="+",
+                color="black")
+    pl.grid(True)
+    pl.title(u"Auslenkung der blauen Linie")
+    pl.xlabel(ur"Ordnung $m$")
+    pl.ylabel(ur"Auslenkung $\phi / \mathrm{rad}$")
+    pl.savefig("d.pdf")
+    pl.clf()
+
+###############################################################################
+#                                  Aufgabe e                                  #
+###############################################################################
+
+    data = np.genfromtxt("e.csv", delimiter="\t")
+
+    m = data[:,0]
+    phi = (data[:,1] - data[:,2])/2 / 100
+
+    blau = 2 * np.sin(phi/2) * g_val / m
+    blau_val = np.mean(blau)
+    blau_err = np.std(blau) / len(blau)
+
+    print "λ_blau = {:.6g} ± {:.3g} m".format(blau_val, blau_err)
+
+###############################################################################
+#                                  Aufgabe f                                  #
+###############################################################################
+
+    f = 0.10
+
+    m = np.array([2, 4, 7])
+    B = np.array([1.4e-2, 0.8e-2, 1.8e-2])
+    B_err = np.array([0.001, 0.001, 0.002])
+    b = np.array([1.0, 1.0, 3.30])
+    b_err = np.array([0.01, 0.01, 0.2])
+    g = np.array([0, 0, 0.105])
+
+    for i in [0, 1]:
+        g[i] = 1.0 / (1/f - 1/b[i])
+
+    for i in [2]:
+        break
+        b[i] = 1.0 / (1/f - 1/g[i])
+
+    G = B * g / b
+    G_err = np.sqrt(
+        (g / b * B_err)**2
+        + (B / b * g_err)**2
+        + (B * g / b**2 * b_err)**2
+    )
+
+    print np.column_stack([m, g, b, G, G_err, B])
+
+    # Auflösungsvermögen des Gitters
+    R = 578.01/2.1
+
+    y = R * g_val / G
+    y_err = np.sqrt(
+        (R / G * g_err)**2
+        + (R * g_val / G**2 * G_err)**2
+    )
+
+    def lin(m, a):
+        return m * a
+
+    popt, pconv = op.curve_fit(lin, m, y, sigma=y_err)
+
+    plot_x = np.linspace(0, 8, 100)
+    plot_y = lin(plot_x, *popt)
+
+    pl.errorbar(m, y, yerr=y_err, linestyle="none", marker="o", color="black",
+                label="Messdaten")
+    pl.plot(plot_x, plot_y, color="black", label="Fit")
+    pl.legend(loc="best")
+    pl.title(u"Auflösungsvermögen des Gitters")
+    pl.xlabel(ur"Ordnung $m$")
+    pl.ylabel(ur"$R/N$")
+    pl.grid(True)
+    pl.savefig("f.pdf")
+    pl.clf()
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()
