@@ -1,0 +1,190 @@
+% Copyright © 2012-2013 Martin Ueding <dev@martin-ueding.de>
+
+% This is my general purpose LaTeX header file for writing German documents.
+% Ideally, you include this using a simple ``\input{header.tex}`` in your main
+% document and start with ``\title`` and ``\begin{document}`` afterwards.
+
+% If you need to add additional packages, I recommend not doing this in this
+% file, but in your main document. That way, you can just drop in a new
+% ``header.tex`` and get all the new commands without having to merge manually.
+
+% Since this file encorporates a CC-BY-SA fragment, this whole files is
+% licensed under the CC-BY-SA license.
+
+\documentclass[11pt, ngerman, fleqn, DIV=15, headinclude]{scrartcl}
+
+\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                Locale, date                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{babel}
+\usepackage[iso]{isodate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                          Margins and other spacing                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[activate]{pdfcprot}
+\usepackage[parfill]{parskip}
+\usepackage{setspace}
+
+\setlength{\columnsep}{2cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                    Color                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{color}
+
+\definecolor{darkblue}{rgb}{0,0,.5}
+\definecolor{darkgreen}{rgb}{0,.5,0}
+\definecolor{darkred}{rgb}{.7,0,0}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         Font and font like settings                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% This replaces all fonts with Bitstream Charter, Bitstream Vera Sans and
+% Bitstream Vera Mono. Math will be rendered in Charter.
+\usepackage[charter, greekuppercase=italicized]{mathdesign}
+\usepackage{beramono}
+\usepackage{berasans}
+
+% Bold, sans-serif tensors. This fragment is taken from “egreg” from
+% http://tex.stackexchange.com/a/82747/8945 and licensed under `CC-BY-SA
+% <https://creativecommons.org/licenses/by-sa/3.0/>`_.
+\usepackage{bm}
+\DeclareMathAlphabet{\mathsfit}{\encodingdefault}{\sfdefault}{m}{sl}
+\SetMathAlphabet{\mathsfit}{bold}{\encodingdefault}{\sfdefault}{bx}{sl}
+\newcommand{\tens}[1]{\bm{\mathsfit{#1}}}
+
+% Bold vectors.
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                               Input encoding                                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         Hyperrefs and PDF metadata                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{hyperref}
+\usepackage{lastpage}
+
+% This sets the author in the properties of the PDF as well. If you want to
+% change it, just override it with another ``\hypersetup`` call.
+\hypersetup{
+	breaklinks=false,
+	citecolor=darkgreen,
+	colorlinks=true,
+	linkcolor=black,
+	menucolor=black,
+	pdfauthor={Martin Ueding},
+	urlcolor=darkblue,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                               Math Operators                                %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[thinspace, squaren]{SIunits}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{commath}
+
+% Word like operators.
+\DeclareMathOperator{\acosh}{arcosh}
+\DeclareMathOperator{\arcosh}{arcosh}
+\DeclareMathOperator{\arcsinh}{arsinh}
+\DeclareMathOperator{\arsinh}{arsinh}
+\DeclareMathOperator{\asinh}{arsinh}
+\DeclareMathOperator{\card}{card}
+\DeclareMathOperator{\csch}{cshs}
+\DeclareMathOperator{\diam}{diam}
+\DeclareMathOperator{\sech}{sech}
+\renewcommand{\Im}{\mathop{{}\mathrm{Im}}\nolimits}
+\renewcommand{\Re}{\mathop{{}\mathrm{Re}}\nolimits}
+
+% Fourier transform.
+\DeclareMathOperator{\fourier}{\ensuremath{\mathcal{F}}}
+
+% Roman versions of “e” and “i” to serve as Euler's number and the imaginary
+% constant.
+\newcommand{\ee}{\eup}
+\newcommand{\eup}{\mathrm e}
+\newcommand{\ii}{\iup}
+\newcommand{\iup}{\mathrm i}
+
+% Symbols for the various mathematical fields (natural numbers, integers,
+% rational numbers, real numbers, complex numbers).
+\newcommand{\C}{\ensuremath{\mathbb C}}
+\newcommand{\N}{\ensuremath{\mathbb N}}
+\newcommand{\Q}{\ensuremath{\mathbb Q}}
+\newcommand{\R}{\ensuremath{\mathbb R}}
+\newcommand{\Z}{\ensuremath{\mathbb Z}}
+
+% Shape like operators.
+\DeclareMathOperator{\dalambert}{\Box}
+\DeclareMathOperator{\laplace}{\bigtriangleup}
+\newcommand{\curl}{\vnabla \times}
+\newcommand{\divergence}[1]{\inner{\vnabla}{#1}}
+\newcommand{\vnabla}{\vec \nabla}
+
+\newcommand{\half}{\frac 12}
+
+% Unit vector (German „Einheitsvektor“).
+\newcommand{\ev}{\hat{\vec e}}
+
+% Scientific notation for large numbers.
+\newcommand{\e}[1]{\cdot 10^{#1}}
+
+% Mathematician's notation for the inner (scalar, dot) product.
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+
+% Placeholders.
+\newcommand{\emesswert}{\del{\messwert \pm \messwert}}
+\newcommand{\fehlt}{\textcolor{darkred}{Hier fehlen noch Inhalte.}}
+\newcommand{\messwert}{\textcolor{blue}{\square}}
+\newcommand{\punkte}{\textcolor{white}{xxxxx}}
+
+% Separator for equations on a single line.
+\newcommand{\eqnsep}{,\quad}
+
+% Quantum Mechanics
+\newcommand{\bra}[1]{\left\langle #1 \right|}
+\newcommand{\ket}[1]{\left| #1 \right\rangle}
+\newcommand{\braket}[2]{\left\langle #1 \left. \vphantom{#1 #2} \right| #2 \right\rangle}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                  Headings                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% This will set fancy headings to the top of the page. The page number will be
+% accompanied by the total number of pages. That way, you will know if any page
+% is missing.
+%
+% If you do not want this for your document, you can just use
+% ``\pagestyle{plain}``.
+
+\usepackage{scrpage2}
+
+\pagestyle{scrheadings}
+
+\automark{section}
+\cfoot{\footnotesize{Seite \thepage\ / \pageref{LastPage}}}
+\chead{}
+\ihead{}
+\ohead{\rightmark}
+\setheadsepline{.4pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                            Bibliography (BibTeX)                            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\bibliographyfile}{../../zentrale_BibTeX/Central}
