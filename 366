@@ -1,0 +1,167 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
+
+import wavelength
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+###############################################################################
+#                                  Aufgabe b                                  #
+###############################################################################
+
+    data = np.genfromtxt("b.csv")
+    alpha = np.radians(data[:,0] + data[:,1] / 60)
+    alpha_err = np.radians(5.0/60)
+    gamma = np.abs(alpha[0] - alpha[1]) / 2
+    gamma_err = np.sqrt(2) * (alpha_err / 2)
+
+    print "γ = {:.6g} ± {:.3g} rad".format(gamma, gamma_err)
+
+###############################################################################
+#                                  Aufgabe c                                  #
+###############################################################################
+
+    namen = [u"rot", u"gelb", u"grün", u"cyan", u"blau 1", u"blau 2", u"blau 3", u"violett"]
+
+    data = np.genfromtxt("c.csv")
+    lambda_ = data[:,0] / 10**9
+    alpha = np.column_stack([
+        np.radians(data[:,1] + data[:,2] / 60),
+        np.radians(data[:,3] + data[:,4] / 60),
+    ])
+
+    delta = (alpha[:,1] - alpha[:,0])/2
+    delta_err = np.ones(delta.size) * alpha_err
+
+    n = np.sin((delta + gamma)/2) / np.sin(gamma/2)
+    n_err = np.sqrt(
+        (0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) * delta_err)**2
+        + ((0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) - 0.5 / np.tan(gamma/2) / np.sin(gamma/2) * np.sin((delta+gamma)/2)) * gamma_err)**2
+    )
+
+    for name, d in zip(namen, delta):
+        print name, d, "rad"
+
+    def cauchy(lambda_, k1, k2):
+        return k1 + k2 / lambda_**2
+
+    popt, pconv = op.curve_fit(cauchy, lambda_, n, sigma=n_err)
+    x = np.linspace(min(lambda_), max(lambda_))
+    y = cauchy(x, *popt)
+    pl.plot(x * 10**9, y, label=u"Cauchy-Fit", color="black")
+
+    k0 = popt[0]
+    k0_err = np.sqrt(pconv.diagonal()[0])
+    k1 = popt[1]
+    k1_err = np.sqrt(pconv.diagonal()[1])
+
+    pl.errorbar(lambda_ * 10**9, n, yerr=n_err, label="Messdaten",
+                linestyle="none", marker="+", color="black")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.title(u"Quecksilber-Cadmium-Lampe")
+    pl.xlabel(ur"Wellenlänge $\lambda / \mathrm{nm}$")
+    pl.ylabel(ur"Brechungsindex $n$")
+    pl.savefig("Plot_c.pdf")
+    pl.clf()
+
+    B = 1.5e-3
+    B_err = 1.0e-3
+
+    print "k0", k0, "±", k0_err
+    print "k1", k1, "±", k1_err
+
+    # Auflösungsvermögen
+    A = 2 * k1 / (lambda_)**3 * B
+    A_err = np.sqrt(
+        (2 * k1 / (lambda_)**3 * B_err)**2
+        + (2 * B / lambda_**3 * k1_err)**2
+    )
+
+    print "A[1]", A[1], A_err[1]
+
+    # Benötigtes Auflösungsvermögen für die gelben Linien:
+    l1 = 579.06
+    l2 = 576.96
+    R = np.abs(np.mean([l1, l2]) / (l1-l2))
+
+    print "R", R
+
+    print "λ, A, λ/A"
+    print np.column_stack([lambda_*10**9, A, lambda_ / A*10**9])
+
+###############################################################################
+#                                  Aufgabe d                                  #
+###############################################################################
+
+    data = np.genfromtxt("d.csv")
+    alpha = np.column_stack([
+        np.radians(data[:,0] + data[:,1] / 60),
+        np.radians(data[:,2] + data[:,3] / 60),
+    ])
+
+    delta = (alpha[:,1] - alpha[:,0])/2
+    delta_err = np.ones(delta.size) * alpha_err
+
+    print u"δ"
+    print delta
+
+    n = np.sin((delta + gamma)/2) / np.sin(gamma/2)
+    n_err = np.sqrt(
+        (0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) * delta_err)**2
+        + ((0.5 * np.cos((delta+gamma)/2) / np.sin(gamma/2) - 0.5 / np.tan(gamma/2) / np.sin(gamma/2) * np.sin((delta+gamma)/2)) * gamma_err)**2
+    )
+
+    print u"n, Δn"
+    print np.column_stack([n, n_err])
+
+    lambda_ = np.sqrt(k1/(n - k0))
+    lambda_err = np.sqrt(
+        (k1 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)**2) * n_err)**2
+        + (k1 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)**2) * k0_err)**2
+        + (1.0 / (2 * np.sqrt(k1/(-k0+n)) * (-k0 + n)) * k1_err)**2
+    )
+
+    print u"λ, Δλ"
+    print np.column_stack([lambda_, lambda_err]) * 10**9
+
+    with open("color.html", "w") as f:
+        for r, g, b, l in [wavelength.wav2RGB(l * 10**9) + [int((l - min(lambda_)) *10**9)] for l in lambda_]:
+            f.write("""
+                    <div style="
+                    background-color: rgb({}, {}, {});
+                    width: 5px;
+                    height: 100px;
+                    position: absolute;
+                    top: 0px;
+                    left: {}px;">
+                    </div>
+                    """.format(r, g, b, l))
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()
