@@ -1,0 +1,323 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright © 2013 Martin Ueding <dev@martin-ueding.de>
+
+from prettytable import PrettyTable
+import argparse
+import matplotlib.pyplot as pl
+import numpy as np
+import scipy.optimize as op
+import unitprint as up
+
+__docformat__ = "restructuredtext en"
+
+def main():
+    options = _parse_args()
+
+    print """#######################
+physik312 – Versuch 364
+#######################
+
+Auswertung
+==========
+"""
+
+    print """
+Aufgabe a
+---------
+""".strip()
+
+    G = 0.86e-3
+    B = 9.0e-3
+    G_err = 0.005e-3
+
+    gamma_obj1 = B/G
+    gamma_obj1_err = B/G**2 * G_err
+
+    print
+    print "Objektivmaßstab bei 10x und 10x:"
+    print "γ_obj1 = {}".format(up.format(gamma_obj1, error=gamma_obj1_err, lit=10))
+
+    B = 9.3e-3
+    G = 0.5e-3
+
+    gamma_obj2 = B/G
+    gamma_obj2_err = B/G**2 * G_err
+
+    print
+    print "Objektivmaßstab bei 20x und 10x:"
+    print "γ_obj2 = {}".format(up.format(gamma_obj2, error=gamma_obj2_err, lit=20))
+
+    B = 10e-2
+    G = 0.72e-3
+    G_err = 0.01e-3
+
+    gamma_M1 = B/G
+    gamma_M1_err = B/G**2 * G_err
+
+    print
+    print "Gesamtmaßstab bei 10x und 10x:"
+    print "γ_M1 = {}".format(up.format(gamma_M1, error=gamma_M1_err, lit=100))
+
+    B = 4e-2
+    G = 0.37e-3
+    G_err = 0.01e-3
+
+    gamma_M2 = B/G
+    gamma_M2_err = B/G**2 * G_err
+
+    print
+    print "Gesamtmaßstab bei 20x und 5x:"
+    print "γ_M2 = {}".format(up.format(gamma_M2, error=gamma_M2_err, lit=100))
+
+    b = 31.7e-2
+    b_err = 0.25e-2
+    s0 = 25e-2
+
+    V_oku1 = gamma_M1 * s0 / gamma_obj1 / b
+    V_oku1_err = np.sqrt(
+        (s0 / gamma_obj1 / b * gamma_M1_err)**2
+        +(gamma_M1 * s0 / gamma_obj1**2 / b * gamma_obj1_err)**2
+        +(gamma_M1 * s0 / gamma_obj1 / b**2 * b_err)**2
+    )
+
+    V_oku2 = gamma_M2 * s0 / gamma_obj2 / b
+    V_oku2_err = np.sqrt(
+        (s0 / gamma_obj2 / b * gamma_M2_err)**2
+        +(gamma_M2 * s0 / gamma_obj2**2 / b * gamma_obj2_err)**2
+        +(gamma_M2 * s0 / gamma_obj2 / b**2 * b_err)**2
+    )
+
+    print
+    print "Vergrößerung des Okulars:"
+    print "V_oku1 = {}".format(up.format(V_oku1, V_oku1_err))
+    print "V_oku2 = {}".format(up.format(V_oku2, V_oku2_err))
+
+    print """
+Aufgabe b
+---------
+"""
+
+    T = 6e-2
+    T_err = 0.1e-2
+
+    B = 4e-2
+    G = 0.235e-3
+
+    gamma_2 = B/G
+    gamma_2_err = B/G**2 * G_err
+
+    print "Maßstab mit Tubusverlängerung:"
+    print "γ_2 = {}".format(up.format(gamma_2, gamma_2_err))
+
+    f = T / (gamma_2 - gamma_M2)
+    f_err = np.sqrt(
+        (1/(gamma_2 - gamma_M2) * T_err)**2
+        + (T / (gamma_2 - gamma_M2)**2 * gamma_2_err)**2
+        + (T / (gamma_2 - gamma_M2)**2 * gamma_M2_err)**2
+    )
+
+    print
+    print "Brennweite nach Abbe:"
+    print "f = {}".format(up.format(f, f_err, "m"))
+
+    print """
+Aufgabe c und d: Astronomisches Fernrohr
+----------------------------------------
+"""
+
+    data = np.genfromtxt("c.csv")
+
+    f1 = data[:,0]
+    f2 = data[:,1]
+    B = data[:,2]
+    G = data[:,3]
+    B_err = data[:,4]
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    t = PrettyTable([u"f₁ in mm", u"f₂ in mm", "V_f", "V_a", "Fehler V_a"])
+    t.align = "c"
+
+    for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
+        row = ["{:.3g}".format(x) for x in row]
+        t.add_row(row)
+
+    print t
+
+    print """
+Aufgabe e: Terrestisches Fernrohr
+---------------------------------
+"""
+
+    l1 = 36.5e-2
+    l2 = 42e-2
+    l_err = 0.5e-2
+
+    differenz = l2-l1
+    differenz_err = np.sqrt(2) * l_err
+
+    print "Längendifferenz: {}".format(up.format(differenz, differenz_err, "m"))
+
+    B = 12e-2
+    B_err = 2e-2
+    G = 2e-2
+
+    f1 = 300e-3
+    f2 = 50e-3
+    f3 = 12.7-3
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    print
+    print "V_f = {}".format(up.format(V_f))
+    print "V_a = {}".format(up.format(V_a, V_a_err))
+
+    print """
+Aufgabe g: Zwischenbildebene im terrestischen Fernrohr
+------------------------------------------------------
+"""
+
+    f1 = 300e-3
+    f2 = 50.2e-3
+
+    B = 10e-2
+    G = 0.6e-2
+
+    V_f = f1/f2
+    V_a = B/G
+    V_a_err = 1/G * B_err
+
+    print "V_f = {}".format(up.format(V_f))
+    print "V_a = {}".format(up.format(V_a, V_a_err))
+
+    print """
+Aufgabe f: Galileisches Fernrohr
+--------------------------------
+"""
+
+    data = np.genfromtxt("f.csv")
+
+    f1 = data[:,0]
+    f2 = data[:,1]
+    B = data[:,2]
+    G = data[:,3]
+    B_err = data[:,4]
+
+    V_f = np.abs(f1/f2)
+    V_a = np.abs(B/G)
+    V_a_err = np.abs(1/G * B_err)
+
+    t = PrettyTable([u"f₁ in mm", u"f₂ in mm", "V_f", "V_a", "Fehler V_a"])
+    t.align = "c"
+
+    for row in zip(f1*1000, f2*1000, V_f, V_a, V_a_err):
+        row = ["{:.3g}".format(x) for x in row]
+        t.add_row(row)
+
+    print t
+
+    print """
+Aufgabe h: Auflösungsvermögen
+------------------------------
+"""
+
+    data = np.genfromtxt("h.csv")
+    D = data[:,0]/1000
+    G = (data[:,2]-data[:,1])/100
+    G_err = 1e-3
+
+    E = 5.20
+    E_err = 10e-2
+
+    alpha = np.pi * G / 36 / E
+    alpha_err = np.pi / 36 * np.sqrt(
+        (1/E * G_err)**2
+        + (G/E**2 * E_err)**2
+    )
+
+    def fit(D, lambda_):
+        return 1.22 * lambda_ / D
+
+    popt, pconv = op.curve_fit(fit, D, alpha, sigma=alpha_err)
+    x = np.linspace(min(D), max(D))
+    y = fit(x, *popt)
+    pl.plot(1/(x*1000), y*1000, label="Fit", color="black")
+
+    lambda_ = popt[0]
+    lambda_err = np.sqrt(pconv.diagonal()[0])
+
+    print "λ = {}".format(up.format(lambda_, lambda_err, "m"))
+
+    pl.errorbar(1/(D*1000), alpha*1000, yerr=alpha_err*1000, label="Messdaten", linestyle="none", marker="+", color="black")
+    pl.title(u"Auflösungsvermögen des Fernrohrs")
+    pl.xlabel(ur"inverser Abstand $D^{-1} / \mathrm{mm^{-1}}$")
+    pl.ylabel(ur"Sehwinkel $\alpha/\mathrm{mrad}$")
+    pl.grid(True)
+    pl.legend(loc="best")
+    pl.savefig("Plot-h.pdf")
+    pl.clf()
+
+    t = PrettyTable(["D in mm", u"α in mrad", u"Fehler α in mrad", u"α in °"])
+    for d, a, a_err in zip(D, alpha, alpha_err):
+        row = ["{:.3g}".format(x) for x in [d*1000, a*1000, a_err*1000]] + [radian_to_dms(a)]
+        t.add_row(row)
+    t.align = "l"
+
+    print
+    print t
+
+    print """
+Aufgabe i: Diskussion
+---------------------
+"""
+
+    y = 1e-6
+    lambda_ = 500e-9
+    n = 1.0
+
+    na = 0.61 * lambda_ / y
+
+    print "Numerische Apertur des Mikroskops:", na
+
+    u_auge = 2.54e-2/300 / 0.25
+    print "Winkel des Auges (300 DPI):", up.format(u_auge, unit="rad")
+
+    u_auge = 1e-3 / 2
+    print "Winkel des Auges (1mm Maß):", up.format(u_auge, unit="rad")
+
+
+def radian_to_dms(angle):
+    """
+    Converts an angle that is given in radians to degrees, minutes and seconds.
+    """
+    degree = np.degrees(angle)
+
+    d = int(degree)
+    m = int((degree % 1) * 60)
+    s = ((degree * 60) % 1) * 60
+
+    return u"{:3d}° {:2d}' {:4.1f}\"".format(d, m, s)
+
+def _parse_args():
+    """
+    Parses the command line arguments.
+
+    :return: Namespace with arguments.
+    :rtype: Namespace
+    """
+    parser = argparse.ArgumentParser(description="Auswertungsprogramm physik312 Versuch 364")
+    #parser.add_argument("args", metavar="N", type=str, nargs="*", help="Positional arguments.")
+    #parser.add_argument("", dest="", type="", default=, help=)
+    #parser.add_argument("--version", action="version", version="<the version>")
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    main()
